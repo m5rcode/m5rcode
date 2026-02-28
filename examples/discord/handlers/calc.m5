@@ -1,0 +1,9 @@
+# Calculator command handler
+import std.io
+
+io.println("🔢 **Calculator**")
+io.println("2 + 2 = " + toStr(2 + 2))
+io.println("10 * 5 = " + toStr(10 * 5))
+io.println("100 - 25 = " + toStr(100 - 25))
+io.println("sqrt(16) = " + toStr(math.sqrt(16)))
+io.println("pow(2, 8) = " + toStr(math.pow(2, 8)))

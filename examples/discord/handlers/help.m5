@@ -1,0 +1,17 @@
+# Help command handler
+import std.io
+
+io.println("📖 **m5rBot Help**")
+io.println("")
+io.println("**Basic Commands:**")
+io.println("`!ping` - Check if bot is online")
+io.println("`!hello` - Get a greeting")
+io.println("`!info` - Bot information")
+io.println("")
+io.println("**Utility Commands:**")
+io.println("`!calc` - See calculator examples")
+io.println("`!math` - Math operations demo")
+io.println("")
+io.println("**About:**")
+io.println("This bot is powered by m5rcode, a modern programming language.")
+io.println("For more info, use `!info`")

@@ -1,16 +1,8 @@
-# Simple Discord bot example in m5rcode
+# Discord bot for m5rcode - Event-driven version
 import std.io
 
-io.println("🤖 m5rcode Discord Bot v0.1.0")
-io.println("========================================")
-
-# Bot configuration
-let bot_name = "m5rBot"
-let prefix = "!"
-
-io.println("Bot Name: " + bot_name)
-io.println("Prefix: " + prefix)
-io.println("")
+# Read Discord event from environment
+let event_file = "/tmp/m5rcode_discord_event.json"
 
 # Commands
 fn handle_ping() {
@@ -23,62 +15,42 @@ fn handle_hello() {
 
 fn handle_calc() {
     let result = 2 + 2
-    io.println("🔢 Calculator: 2 + 2 = " + toStr(result))
+    io.println("🔢 2 + 2 = " + toStr(result))
 }
 
 fn handle_info() {
-    io.println("📊 Bot Information:")
-    io.println("  Name: m5rBot")
-    io.println("  Version: 0.1.0")
-    io.println("  Language: m5rcode v0.3.1")
-    io.println("  Commands: ping, hello, calc, info")
+    io.println("📊 m5rBot v0.1.0 | Language: m5rcode v0.3.1")
 }
 
-fn handle_math(a, b) {
-    io.println("➕ " + toStr(a) + " + " + toStr(b) + " = " + toStr(a + b))
-    io.println("➖ " + toStr(a) + " - " + toStr(b) + " = " + toStr(a - b))
-    io.println("✖️  " + toStr(a) + " * " + toStr(b) + " = " + toStr(a * b))
+fn handle_math() {
+    io.println("➕ 10 + 5 = 15")
+    io.println("➖ 10 - 5 = 5")
+    io.println("✖️  10 * 5 = 50")
 }
 
-# Message handler
-fn on_message(author, content) {
-    io.println("[" + author + "] " + content)
+# Simple command router - only responds to commands
+fn route_command(content) {
+    if content == "!ping" {
+        handle_ping()
+    }
     
-    # Simple command routing
-    let cmd = str.trim(content)
+    if content == "!hello" {
+        handle_hello()
+    }
     
-    # Note: String comparison in m5rcode
-    # For now, we'll use a simple approach
-    io.println("  → Processing command...")
+    if content == "!calc" {
+        handle_calc()
+    }
+    
+    if content == "!info" {
+        handle_info()
+    }
+    
+    if content == "!math" {
+        handle_math()
+    }
 }
 
-# Test the bot
-io.println("📝 Testing Commands:")
-io.println("")
-
-io.println("Command: !ping")
-handle_ping()
-io.println("")
-
-io.println("Command: !hello")
-handle_hello()
-io.println("")
-
-io.println("Command: !calc")
-handle_calc()
-io.println("")
-
-io.println("Command: !info")
-handle_info()
-io.println("")
-
-io.println("Command: !math 10 5")
-handle_math(10, 5)
-io.println("")
-
-io.println("✅ All commands tested successfully!")
-io.println("")
-io.println("💡 To connect to Discord:")
-io.println("   1. Get bot token from https://discord.com/developers")
-io.println("   2. Enable MESSAGE_CONTENT intent")
-io.println("   3. Run: m5rcode-discord <TOKEN> simple_bot.m5")
+# This will be called by the Discord bridge for each message
+# For now, we'll just route based on content
+route_command("!ping")

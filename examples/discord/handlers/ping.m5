@@ -1,0 +1,4 @@
+# Ping command handler
+import std.io
+
+io.println("🏓 Pong!")

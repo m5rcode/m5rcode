@@ -1,0 +1,4 @@
+# Hello command handler
+import std.io
+
+io.println("👋 Hello from m5rcode! I'm a bot written in the m5rcode programming language!")

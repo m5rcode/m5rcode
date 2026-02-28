@@ -3,6 +3,8 @@ name = "m5rcode-discord"
 version = "0.1.0"
 edition = "2021"
 
+[workspace]
+
 [dependencies]
 serenity = { version = "0.12", default-features = false, features = ["client", "gateway", "rustls_backend", "model"] }
 tokio = { version = "1", features = ["full"] }

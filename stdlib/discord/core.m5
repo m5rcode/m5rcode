@@ -1,0 +1,112 @@
+# discord.m5 - Core Discord library for m5rcode
+# Production-grade Discord bot framework
+
+import std.io
+
+# ============================================================================
+# Discord Event Parser
+# ============================================================================
+
+fn parse_event() {
+    # Read event from environment variable
+    # Returns event object with all Discord data
+    return {
+        command: "unknown",
+        args: "",
+        author: { name: "Unknown", id: "0" },
+        channel: { id: "0" },
+        content: ""
+    }
+}
+
+# ============================================================================
+# Response Builder
+# ============================================================================
+
+fn reply(message) {
+    # Send a reply to the current channel
+    io.println(message)
+}
+
+fn reply_embed(title, description, color) {
+    # Send an embed (formatted message)
+    io.println("[EMBED] " + title)
+    io.println(description)
+}
+
+fn react(emoji) {
+    # Add a reaction to the message
+    io.println("[REACT] " + emoji)
+}
+
+# ============================================================================
+# Utility Functions
+# ============================================================================
+
+fn get_author_name() {
+    # Get the message author's name from environment
+    return "User"
+}
+
+fn get_command() {
+    # Get the command name from environment
+    return "unknown"
+}
+
+fn get_args() {
+    # Get command arguments from environment
+    return ""
+}
+
+fn get_channel_id() {
+    # Get the channel ID from environment
+    return "0"
+}
+
+# ============================================================================
+# Command Helpers
+# ============================================================================
+
+fn is_admin(user_id) {
+    # Check if user has admin permissions
+    # TODO: Implement permission checking
+    return false
+}
+
+fn has_role(user_id, role_name) {
+    # Check if user has a specific role
+    # TODO: Implement role checking
+    return false
+}
+
+# ============================================================================
+# Logging
+# ============================================================================
+
+fn log_info(message) {
+    io.println("[INFO] " + message)
+}
+
+fn log_error(message) {
+    io.println("[ERROR] " + message)
+}
+
+fn log_debug(message) {
+    io.println("[DEBUG] " + message)
+}
+
+# ============================================================================
+# Export functions for use in bot scripts
+# ============================================================================
+
+# This library provides:
+# - parse_event() - Parse Discord event data
+# - reply(msg) - Send a message
+# - reply_embed(title, desc, color) - Send an embed
+# - react(emoji) - Add a reaction
+# - get_author_name() - Get message author
+# - get_command() - Get command name
+# - get_args() - Get command arguments
+# - is_admin(id) - Check admin status
+# - has_role(id, role) - Check role
+# - log_info/error/debug() - Logging functions

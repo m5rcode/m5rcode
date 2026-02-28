@@ -1,0 +1,21 @@
+{
+  "bot": {
+    "name": "m5rBot",
+    "version": "0.1.0",
+    "prefix": "!",
+    "description": "A Discord bot powered by m5rcode"
+  },
+  "commands": {
+    "ping": "handlers/ping.m5",
+    "hello": "handlers/hello.m5",
+    "calc": "handlers/calc.m5",
+    "info": "handlers/info.m5",
+    "help": "handlers/help.m5",
+    "math": "handlers/math.m5"
+  },
+  "features": {
+    "ignore_bots": true,
+    "command_prefix": "!",
+    "case_sensitive": false
+  }
+}

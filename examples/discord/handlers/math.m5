@@ -1,0 +1,21 @@
+# Math command handler
+import std.io
+
+io.println("🔢 **Math Operations**")
+io.println("")
+io.println("**Basic Operations:**")
+io.println("10 + 5 = " + toStr(10 + 5))
+io.println("10 - 5 = " + toStr(10 - 5))
+io.println("10 * 5 = " + toStr(10 * 5))
+io.println("")
+io.println("**Advanced Math:**")
+io.println("sqrt(144) = " + toStr(math.sqrt(144)))
+io.println("pow(2, 10) = " + toStr(math.pow(2, 10)))
+io.println("abs(-42) = " + toStr(math.abs(0 - 42)))
+io.println("floor(3.7) = " + toStr(math.floor(3.7)))
+io.println("ceil(3.2) = " + toStr(math.ceil(3.2)))
+io.println("round(3.5) = " + toStr(math.round(3.5)))
+io.println("")
+io.println("**Comparisons:**")
+io.println("min(10, 5) = " + toStr(math.min(10, 5)))
+io.println("max(10, 5) = " + toStr(math.max(10, 5)))
