@@ -145,8 +145,15 @@ impl Parser {
         let then_block = self.parse_block()?;
         let else_block = if matches!(self.peek().typ, TokenType::Else) {
             self.advance();
-            self.expect_token(TokenType::LBrace)?;
-            Some(self.parse_block()?)
+            // Check for 'else if'
+            if matches!(self.peek().typ, TokenType::If) {
+                // Parse 'else if' as a nested if statement
+                Some(vec![self.parse_if()?])
+            } else {
+                // Regular 'else' block
+                self.expect_token(TokenType::LBrace)?;
+                Some(self.parse_block()?)
+            }
         } else {
             None
         };

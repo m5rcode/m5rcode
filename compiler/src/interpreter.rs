@@ -125,6 +125,21 @@ impl Interpreter {
         io_methods.insert("input".to_string(), Value::NativeFunction { name: "input".to_string(), arity: 1 });
         globals.insert("io".to_string(), Value::Object(io_methods));
         
+        // std.env module - Environment variables
+        let mut env_methods = HashMap::new();
+        env_methods.insert("get".to_string(), Value::NativeFunction { name: "env_get".to_string(), arity: 1 });
+        env_methods.insert("set".to_string(), Value::NativeFunction { name: "env_set".to_string(), arity: 2 });
+        env_methods.insert("has".to_string(), Value::NativeFunction { name: "env_has".to_string(), arity: 1 });
+        globals.insert("env".to_string(), Value::Object(env_methods));
+        
+        // std.fs module - File system
+        let mut fs_methods = HashMap::new();
+        fs_methods.insert("read".to_string(), Value::NativeFunction { name: "fs_read".to_string(), arity: 1 });
+        fs_methods.insert("write".to_string(), Value::NativeFunction { name: "fs_write".to_string(), arity: 2 });
+        fs_methods.insert("exists".to_string(), Value::NativeFunction { name: "fs_exists".to_string(), arity: 1 });
+        fs_methods.insert("delete".to_string(), Value::NativeFunction { name: "fs_delete".to_string(), arity: 1 });
+        globals.insert("fs".to_string(), Value::Object(fs_methods));
+        
         // std.math module
         let mut math_methods = HashMap::new();
         math_methods.insert("abs".to_string(), Value::NativeFunction { name: "abs".to_string(), arity: 1 });
@@ -145,6 +160,10 @@ impl Interpreter {
         str_methods.insert("trim".to_string(), Value::NativeFunction { name: "trim".to_string(), arity: 1 });
         str_methods.insert("split".to_string(), Value::NativeFunction { name: "split".to_string(), arity: 2 });
         str_methods.insert("join".to_string(), Value::NativeFunction { name: "join".to_string(), arity: 2 });
+        str_methods.insert("contains".to_string(), Value::NativeFunction { name: "str_contains".to_string(), arity: 2 });
+        str_methods.insert("starts_with".to_string(), Value::NativeFunction { name: "str_starts_with".to_string(), arity: 2 });
+        str_methods.insert("ends_with".to_string(), Value::NativeFunction { name: "str_ends_with".to_string(), arity: 2 });
+        str_methods.insert("replace".to_string(), Value::NativeFunction { name: "str_replace".to_string(), arity: 3 });
         globals.insert("str".to_string(), Value::Object(str_methods));
         
         // std.list module
@@ -152,6 +171,8 @@ impl Interpreter {
         list_methods.insert("len".to_string(), Value::NativeFunction { name: "list_len".to_string(), arity: 1 });
         list_methods.insert("push".to_string(), Value::NativeFunction { name: "push".to_string(), arity: 2 });
         list_methods.insert("pop".to_string(), Value::NativeFunction { name: "pop".to_string(), arity: 1 });
+        list_methods.insert("append".to_string(), Value::NativeFunction { name: "list_append".to_string(), arity: 2 });
+        list_methods.insert("contains".to_string(), Value::NativeFunction { name: "list_contains".to_string(), arity: 2 });
         list_methods.insert("map".to_string(), Value::NativeFunction { name: "map".to_string(), arity: 2 });
         list_methods.insert("filter".to_string(), Value::NativeFunction { name: "filter".to_string(), arity: 2 });
         list_methods.insert("reduce".to_string(), Value::NativeFunction { name: "reduce".to_string(), arity: 3 });
@@ -349,7 +370,16 @@ impl Interpreter {
                 ">=" => Ok(Value::Bool(l >= r)),
                 _ => Err(format!("Unknown operator: {}", op)),
             },
-            (Value::String(l), Value::String(r)) if op == "+" => Ok(Value::String(l + &r)),
+            (Value::String(l), Value::String(r)) => match op {
+                "+" => Ok(Value::String(l + &r)),
+                "==" => Ok(Value::Bool(l == r)),
+                "!=" => Ok(Value::Bool(l != r)),
+                "<" => Ok(Value::Bool(l < r)),
+                ">" => Ok(Value::Bool(l > r)),
+                "<=" => Ok(Value::Bool(l <= r)),
+                ">=" => Ok(Value::Bool(l >= r)),
+                _ => Err(format!("Unknown operator for strings: {}", op)),
+            },
             (Value::String(l), Value::Int(r)) if op == "+" => Ok(Value::String(l + &r.to_string())),
             (Value::Int(l), Value::String(r)) if op == "+" => Ok(Value::String(l.to_string() + &r)),
             (Value::String(l), other) if op == "+" => Ok(Value::String(l + &format!("{}", other))),
@@ -697,6 +727,138 @@ impl Interpreter {
                     Ok(Value::Bool(val.is_truthy()))
                 } else {
                     Ok(Value::Bool(false))
+                }
+            },
+            
+            // Environment variable functions
+            "env_get" => {
+                match args.first() {
+                    Some(Value::String(name)) => {
+                        match std::env::var(name) {
+                            Ok(val) => Ok(Value::String(val)),
+                            Err(_) => Ok(Value::String(String::new())),
+                        }
+                    },
+                    _ => Err("env.get() requires a string".to_string()),
+                }
+            },
+            "env_set" => {
+                match (&args[0], &args[1]) {
+                    (Value::String(name), Value::String(value)) => {
+                        std::env::set_var(name, value);
+                        Ok(Value::Null)
+                    },
+                    _ => Err("env.set() requires two strings".to_string()),
+                }
+            },
+            "env_has" => {
+                match args.first() {
+                    Some(Value::String(name)) => {
+                        Ok(Value::Bool(std::env::var(name).is_ok()))
+                    },
+                    _ => Err("env.has() requires a string".to_string()),
+                }
+            },
+            
+            // File system functions
+            "fs_read" => {
+                match args.first() {
+                    Some(Value::String(path)) => {
+                        match std::fs::read_to_string(path) {
+                            Ok(content) => Ok(Value::String(content)),
+                            Err(e) => Err(format!("Failed to read file: {}", e)),
+                        }
+                    },
+                    _ => Err("fs.read() requires a string path".to_string()),
+                }
+            },
+            "fs_write" => {
+                match (&args[0], &args[1]) {
+                    (Value::String(path), Value::String(content)) => {
+                        match std::fs::write(path, content) {
+                            Ok(_) => Ok(Value::Null),
+                            Err(e) => Err(format!("Failed to write file: {}", e)),
+                        }
+                    },
+                    _ => Err("fs.write() requires path and content strings".to_string()),
+                }
+            },
+            "fs_exists" => {
+                match args.first() {
+                    Some(Value::String(path)) => {
+                        Ok(Value::Bool(std::path::Path::new(path).exists()))
+                    },
+                    _ => Err("fs.exists() requires a string path".to_string()),
+                }
+            },
+            "fs_delete" => {
+                match args.first() {
+                    Some(Value::String(path)) => {
+                        match std::fs::remove_file(path) {
+                            Ok(_) => Ok(Value::Null),
+                            Err(e) => Err(format!("Failed to delete file: {}", e)),
+                        }
+                    },
+                    _ => Err("fs.delete() requires a string path".to_string()),
+                }
+            },
+            
+            // Enhanced string functions
+            "str_contains" => {
+                match (&args[0], &args[1]) {
+                    (Value::String(haystack), Value::String(needle)) => {
+                        Ok(Value::Bool(haystack.contains(needle.as_str())))
+                    },
+                    _ => Err("str.contains() requires two strings".to_string()),
+                }
+            },
+            "str_starts_with" => {
+                match (&args[0], &args[1]) {
+                    (Value::String(s), Value::String(prefix)) => {
+                        Ok(Value::Bool(s.starts_with(prefix.as_str())))
+                    },
+                    _ => Err("str.starts_with() requires two strings".to_string()),
+                }
+            },
+            "str_ends_with" => {
+                match (&args[0], &args[1]) {
+                    (Value::String(s), Value::String(suffix)) => {
+                        Ok(Value::Bool(s.ends_with(suffix.as_str())))
+                    },
+                    _ => Err("str.ends_with() requires two strings".to_string()),
+                }
+            },
+            "str_replace" => {
+                match (&args[0], &args[1], &args[2]) {
+                    (Value::String(s), Value::String(from), Value::String(to)) => {
+                        Ok(Value::String(s.replace(from.as_str(), to.as_str())))
+                    },
+                    _ => Err("str.replace() requires three strings".to_string()),
+                }
+            },
+            
+            // Enhanced list functions
+            "list_append" => {
+                match (&args[0], &args[1]) {
+                    (Value::List(list), item) => {
+                        let mut new_list = list.clone();
+                        new_list.push(item.clone());
+                        Ok(Value::List(new_list))
+                    },
+                    _ => Err("list.append() requires a list and an item".to_string()),
+                }
+            },
+            "list_contains" => {
+                match (&args[0], &args[1]) {
+                    (Value::List(list), item) => {
+                        for list_item in list {
+                            if format!("{}", list_item) == format!("{}", item) {
+                                return Ok(Value::Bool(true));
+                            }
+                        }
+                        Ok(Value::Bool(false))
+                    },
+                    _ => Err("list.contains() requires a list and an item".to_string()),
                 }
             },
             

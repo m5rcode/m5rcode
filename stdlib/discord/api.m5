@@ -1,0 +1,171 @@
+# discord/api.m5 - Complete Discord API bindings for m5rcode
+import std.io
+
+# ============================================================================
+# MODERATION
+# ============================================================================
+
+fn kick(user_id, reason) {
+    io.println("[API:KICK]" + user_id + "|" + reason)
+}
+
+fn ban(user_id, reason) {
+    io.println("[API:BAN]" + user_id + "|" + reason + "|0")
+}
+
+fn ban_delete(user_id, reason, days) {
+    io.println("[API:BAN]" + user_id + "|" + reason + "|" + toStr(days))
+}
+
+fn unban(user_id, reason) {
+    io.println("[API:UNBAN]" + user_id + "|" + reason)
+}
+
+fn timeout(user_id, seconds, reason) {
+    io.println("[API:TIMEOUT]" + user_id + "|" + toStr(seconds) + "|" + reason)
+}
+
+fn untimeout(user_id) {
+    io.println("[API:UNTIMEOUT]" + user_id)
+}
+
+# ============================================================================
+# MESSAGES
+# ============================================================================
+
+fn delete_messages(count) {
+    io.println("[API:DELETE_MESSAGES]CURRENT_CHANNEL|" + toStr(count))
+}
+
+fn purge(count) {
+    delete_messages(count)
+}
+
+fn send_dm(user_id, message) {
+    io.println("[API:SEND_DM]" + user_id + "|" + message)
+}
+
+fn reply(message) {
+    io.println(message)
+}
+
+fn react(emoji) {
+    io.println("[API:REACT]" + emoji)
+}
+
+# ============================================================================
+# ROLES
+# ============================================================================
+
+fn add_role(user_id, role_id) {
+    io.println("[API:ADD_ROLE]" + user_id + "|" + role_id + "|Role added")
+}
+
+fn remove_role(user_id, role_id) {
+    io.println("[API:REMOVE_ROLE]" + user_id + "|" + role_id + "|Role removed")
+}
+
+fn create_role(name, color) {
+    io.println("[API:CREATE_ROLE]" + name + "|" + toStr(color))
+}
+
+# ============================================================================
+# CHANNELS
+# ============================================================================
+
+fn slowmode(seconds) {
+    io.println("[API:SLOWMODE]CURRENT_CHANNEL|" + toStr(seconds))
+}
+
+fn lock_channel() {
+    io.println("[API:LOCK]CURRENT_CHANNEL")
+}
+
+fn unlock_channel() {
+    io.println("[API:UNLOCK]CURRENT_CHANNEL")
+}
+
+fn set_channel_name(name) {
+    io.println("[API:CHANNEL_NAME]CURRENT_CHANNEL|" + name)
+}
+
+fn set_channel_topic(topic) {
+    io.println("[API:CHANNEL_TOPIC]CURRENT_CHANNEL|" + topic)
+}
+
+# ============================================================================
+# EMBEDS
+# ============================================================================
+
+fn embed(title, description, color) {
+    io.println("[API:EMBED]" + title + "|" + description + "|" + toStr(color))
+}
+
+fn embed_field(name, value) {
+    io.println("[API:EMBED_FIELD]" + name + "|" + value)
+}
+
+# ============================================================================
+# VOICE
+# ============================================================================
+
+fn voice_disconnect(user_id) {
+    io.println("[API:VOICE_DISCONNECT]" + user_id)
+}
+
+fn voice_move(user_id, channel_id) {
+    io.println("[API:VOICE_MOVE]" + user_id + "|" + channel_id)
+}
+
+fn voice_mute(user_id) {
+    io.println("[API:VOICE_MUTE]" + user_id)
+}
+
+fn voice_unmute(user_id) {
+    io.println("[API:VOICE_UNMUTE]" + user_id)
+}
+
+fn voice_deafen(user_id) {
+    io.println("[API:VOICE_DEAFEN]" + user_id)
+}
+
+fn voice_undeafen(user_id) {
+    io.println("[API:VOICE_UNDEAFEN]" + user_id)
+}
+
+# ============================================================================
+# UTILITIES
+# ============================================================================
+
+fn get_user_id(mention) {
+    # Extract ID from <@123> or <@!123>
+    # Returns the mention as-is for now (bridge handles parsing)
+    return mention
+}
+
+fn parse_duration(duration_str) {
+    # Parse "5m", "1h", "1d" to seconds
+    if duration_str == "5m" { return 300 }
+    if duration_str == "10m" { return 600 }
+    if duration_str == "30m" { return 1800 }
+    if duration_str == "1h" { return 3600 }
+    if duration_str == "6h" { return 21600 }
+    if duration_str == "12h" { return 43200 }
+    if duration_str == "1d" { return 86400 }
+    if duration_str == "7d" { return 604800 }
+    return 600
+}
+
+# ============================================================================
+# COLORS
+# ============================================================================
+
+fn color_red() { return 16711680 }
+fn color_green() { return 65280 }
+fn color_blue() { return 255 }
+fn color_yellow() { return 16776960 }
+fn color_orange() { return 16753920 }
+fn color_purple() { return 8388736 }
+fn color_pink() { return 16761035 }
+fn color_black() { return 0 }
+fn color_white() { return 16777215 }

@@ -1,0 +1,16 @@
+import std.io
+
+let DISCORD_COMMAND = "help"
+
+fn test() {
+    let cmd = DISCORD_COMMAND
+    io.println("Command is: " + cmd)
+    
+    if cmd == "help" {
+        io.println("HELP!")
+    } else if cmd == "kick" {
+        io.println("KICK!")
+    }
+}
+
+test()

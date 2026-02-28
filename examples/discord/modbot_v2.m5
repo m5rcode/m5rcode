@@ -1,0 +1,57 @@
+# ModBot v2 - Minimal Working Version
+import std.io
+
+fn cmd_help() {
+    io.println("📖 **ModBot Help**")
+    io.println("!help, !info, !ping, !kick, !ban, !mute, !purge")
+}
+
+fn cmd_info() {
+    io.println("🤖 m5rBot v1.0 - Written in m5rcode")
+}
+
+fn cmd_ping() {
+    io.println("🏓 Pong!")
+}
+
+fn cmd_kick() {
+    io.println("Usage: !kick <@user> [reason]")
+}
+
+fn cmd_ban() {
+    io.println("Usage: !ban <@user> [reason]")
+}
+
+fn cmd_mute() {
+    io.println("Usage: !mute <@user> [duration] [reason]")
+}
+
+fn cmd_purge() {
+    io.println("Usage: !purge <amount>")
+}
+
+fn main() {
+    let cmd = DISCORD_COMMAND
+    
+    if cmd == "help" {
+        cmd_help()
+    } else if cmd == "info" {
+        cmd_info()
+    } else if cmd == "ping" {
+        cmd_ping()
+    } else if cmd == "kick" {
+        cmd_kick()
+    } else if cmd == "ban" {
+        cmd_ban()
+    } else if cmd == "mute" {
+        cmd_mute()
+    } else if cmd == "purge" {
+        cmd_purge()
+    }
+}
+
+let DISCORD_COMMAND = "help"
+let DISCORD_ARGS = ""
+let DISCORD_AUTHOR = "TestUser"
+
+main()

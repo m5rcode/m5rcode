@@ -1,0 +1,15 @@
+import std.io
+
+fn cmd_help() {
+    io.println("HELP COMMAND")
+}
+
+fn main() {
+    let cmd = "help"
+    
+    if cmd == "help" {
+        cmd_help()
+    }
+}
+
+main()

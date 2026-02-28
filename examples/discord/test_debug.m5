@@ -1,0 +1,28 @@
+import std.io
+
+fn cmd_help() {
+    io.println("📖 **ModBot Help**")
+}
+
+fn cmd_kick() {
+    io.println("🚫 **Kick Command**")
+}
+
+fn main() {
+    let cmd = DISCORD_COMMAND
+    io.println("DEBUG: Command is: [" + cmd + "]")
+    
+    if cmd == "help" {
+        io.println("DEBUG: Matched help")
+        cmd_help()
+    } else if cmd == "kick" {
+        io.println("DEBUG: Matched kick")
+        cmd_kick()
+    } else {
+        io.println("DEBUG: No match")
+    }
+}
+
+let DISCORD_COMMAND = "help"
+
+main()

@@ -1,0 +1,23 @@
+import std.io
+
+fn cmd_help() {
+    io.println("HELP COMMAND")
+}
+
+fn cmd_kick() {
+    io.println("KICK COMMAND")
+}
+
+fn main() {
+    let cmd = DISCORD_COMMAND
+    
+    if cmd == "help" {
+        cmd_help()
+    } else if cmd == "kick" {
+        cmd_kick()
+    }
+}
+
+let DISCORD_COMMAND = "help"
+
+main()

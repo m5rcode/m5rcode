@@ -2,6 +2,21 @@
 
 **m5rcode** (pronounced "em-five-er-code") is a modern programming language combining the best features of Python, C, Java, HolyC, Rust, and Ruby. It features gradual typing, hybrid memory management (GC + optional ownership), and a focus on developer productivity.
 
+## ✨ What's New in v0.3.2
+
+### Critical Bug Fixes
+- **Fixed else if statements** - Now properly handles multi-branch conditionals
+- **Fixed string comparisons** - Added ==, !=, <, >, <=, >= operators for strings
+
+### New Features
+- **Environment Variables**: `env.get()`, `env.set()`, `env.has()`
+- **File System**: `fs.read()`, `fs.write()`, `fs.exists()`, `fs.delete()`
+- **Enhanced Strings**: `str.contains()`, `str.starts_with()`, `str.ends_with()`, `str.replace()`
+- **Enhanced Lists**: `list.append()`, `list.contains()`
+- **Discord Bot Framework**: Complete rewrite with 20+ working API functions
+
+See [CHANGELOG_v0.3.2.md](CHANGELOG_v0.3.2.md) for full details.
+
 ## ✨ What's New in v0.3.0
 
 - **Comprehensive Standard Library**: 20+ built-in functions for math, strings, lists, and I/O

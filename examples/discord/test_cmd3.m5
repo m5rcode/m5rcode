@@ -1,0 +1,2 @@
+let DISCORD_COMMAND = "help"
+let x = DISCORD_COMMAND

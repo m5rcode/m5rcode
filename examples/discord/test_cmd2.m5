@@ -1,0 +1,11 @@
+import std.io
+
+let DISCORD_COMMAND = "help"
+
+io.println("Direct: " + DISCORD_COMMAND)
+
+fn test() {
+    io.println("In function: " + DISCORD_COMMAND)
+}
+
+test()

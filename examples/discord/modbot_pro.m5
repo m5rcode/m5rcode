@@ -1,0 +1,156 @@
+# ModBot Pro - Full-Featured Discord Moderation Bot
+import std.io
+
+# Get command from environment (injected by bridge)
+let DISCORD_COMMAND = env.get("DISCORD_COMMAND")
+let DISCORD_ARGS = env.get("DISCORD_ARGS")
+let DISCORD_AUTHOR = env.get("DISCORD_AUTHOR")
+
+# Fallback for local testing
+if DISCORD_COMMAND == "" {
+    let DISCORD_COMMAND = "help"
+    let DISCORD_ARGS = ""
+    let DISCORD_AUTHOR = "TestUser"
+}
+
+# ============================================================================
+# MODERATION COMMANDS
+# ============================================================================
+
+fn cmd_kick() {
+    let args = DISCORD_ARGS
+    if args == "" {
+        io.println("❌ Usage: !kick @user reason")
+    } else {
+        io.println("[API:KICK]" + args + "|Kicked by moderator")
+    }
+}
+
+fn cmd_ban() {
+    let args = DISCORD_ARGS
+    if args == "" {
+        io.println("❌ Usage: !ban @user reason")
+    } else {
+        io.println("[API:BAN]" + args + "|Banned by moderator|0")
+    }
+}
+
+fn cmd_unban() {
+    let args = DISCORD_ARGS
+    if args == "" {
+        io.println("❌ Usage: !unban @user reason")
+    } else {
+        io.println("[API:UNBAN]" + args + "|Unbanned by moderator")
+    }
+}
+
+fn cmd_mute() {
+    let args = DISCORD_ARGS
+    if args == "" {
+        io.println("❌ Usage: !mute @user")
+    } else {
+        io.println("[API:TIMEOUT]" + args + "|600|Muted by moderator")
+    }
+}
+
+fn cmd_unmute() {
+    let args = DISCORD_ARGS
+    if args == "" {
+        io.println("❌ Usage: !unmute @user")
+    } else {
+        io.println("[API:UNTIMEOUT]" + args)
+    }
+}
+
+# ============================================================================
+# UTILITY COMMANDS
+# ============================================================================
+
+fn cmd_purge() {
+    let args = DISCORD_ARGS
+    if args == "" {
+        io.println("❌ Usage: !purge <amount>")
+    } else {
+        io.println("[API:DELETE_MESSAGES]CURRENT_CHANNEL|" + args)
+    }
+}
+
+fn cmd_slowmode() {
+    let args = DISCORD_ARGS
+    if args == "" {
+        io.println("❌ Usage: !slowmode <seconds> (0 to disable)")
+    } else {
+        io.println("[API:SLOWMODE]CURRENT_CHANNEL|" + args)
+    }
+}
+
+fn cmd_addrole() {
+    let args = DISCORD_ARGS
+    if args == "" {
+        io.println("❌ Usage: !addrole @user @role")
+    } else {
+        io.println("[API:ADD_ROLE]" + args + "|Role added by moderator")
+    }
+}
+
+fn cmd_removerole() {
+    let args = DISCORD_ARGS
+    if args == "" {
+        io.println("❌ Usage: !removerole @user @role")
+    } else {
+        io.println("[API:REMOVE_ROLE]" + args + "|Role removed by moderator")
+    }
+}
+
+# ============================================================================
+# INFO COMMANDS
+# ============================================================================
+
+fn cmd_help() {
+    io.println("[API:EMBED]ModBot Commands|**Moderation:**\n!kick @user reason\n!ban @user reason\n!unban @user\n!mute @user\n!unmute @user\n\n**Utility:**\n!purge <amount>\n!slowmode <seconds>\n!addrole @user @role\n!removerole @user @role\n\n**Info:**\n!help, !info, !ping|3447003")
+}
+
+fn cmd_info() {
+    io.println("[API:EMBED]ModBot Information|**Version:** 2.0\n**Language:** m5rcode v0.3.1\n**Features:** Full moderation suite\n**Uptime:** 99.9%|5793266")
+}
+
+fn cmd_ping() {
+    io.println("🏓 Pong!")
+    io.println("[API:REACT]✅")
+}
+
+# ============================================================================
+# COMMAND ROUTER
+# ============================================================================
+
+fn main() {
+    let cmd = DISCORD_COMMAND
+    
+    if cmd == "help" {
+        cmd_help()
+    } else if cmd == "info" {
+        cmd_info()
+    } else if cmd == "ping" {
+        cmd_ping()
+    } else if cmd == "kick" {
+        cmd_kick()
+    } else if cmd == "ban" {
+        cmd_ban()
+    } else if cmd == "unban" {
+        cmd_unban()
+    } else if cmd == "mute" {
+        cmd_mute()
+    } else if cmd == "unmute" {
+        cmd_unmute()
+    } else if cmd == "purge" {
+        cmd_purge()
+    } else if cmd == "slowmode" {
+        cmd_slowmode()
+    } else if cmd == "addrole" {
+        cmd_addrole()
+    } else if cmd == "removerole" {
+        cmd_removerole()
+    }
+}
+
+main()

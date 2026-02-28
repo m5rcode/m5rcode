@@ -18,6 +18,232 @@ struct Handler {
     state: Arc<BotState>,
 }
 
+impl Handler {
+    fn extract_user_id(mention: &str) -> Option<u64> {
+        // Extract user ID from mention like <@123456> or <@!123456>
+        let cleaned = mention.trim_start_matches("<@").trim_start_matches("!").trim_end_matches(">");
+        cleaned.parse().ok()
+    }
+    
+    async fn handle_api_call(&self, ctx: &Context, msg: &Message, api_line: &str) -> Result<(), Box<dyn std::error::Error>> {
+        use serenity::model::id::{UserId, RoleId, ChannelId};
+        
+        let parts: Vec<&str> = api_line.split(']').collect();
+        if parts.len() < 2 {
+            return Ok(());
+        }
+        
+        let api_type = parts[0].trim_start_matches("[API:");
+        let args_str = parts[1];
+        let args: Vec<&str> = args_str.split('|').collect();
+        
+        match api_type {
+            "KICK" => {
+                if let (Some(&user_mention), Some(&reason)) = (args.get(0), args.get(1)) {
+                    let guild_id = msg.guild_id.ok_or("Not in a guild")?;
+                    
+                    // Extract user ID from mention or parse directly
+                    let user_id = if let Some(id) = Self::extract_user_id(user_mention) {
+                        UserId::new(id)
+                    } else {
+                        return Ok(());
+                    };
+                    
+                    ctx.http.kick_member(guild_id, user_id, Some(reason)).await?;
+                    msg.channel_id.say(&ctx.http, format!("✅ Kicked <@{}>: {}", user_id, reason)).await?;
+                }
+            }
+            "BAN" => {
+                if let (Some(&user_mention), Some(&reason), Some(&days_str)) = (args.get(0), args.get(1), args.get(2)) {
+                    let guild_id = msg.guild_id.ok_or("Not in a guild")?;
+                    
+                    let user_id = if let Some(id) = Self::extract_user_id(user_mention) {
+                        UserId::new(id)
+                    } else {
+                        return Ok(());
+                    };
+                    
+                    let days: u8 = days_str.parse().unwrap_or(0);
+                    ctx.http.ban_user(guild_id, user_id, days, Some(reason)).await?;
+                    msg.channel_id.say(&ctx.http, format!("🔨 Banned <@{}>: {}", user_id, reason)).await?;
+                }
+            }
+            "TIMEOUT" => {
+                if let (Some(&user_mention), Some(&duration_str), Some(&reason)) = (args.get(0), args.get(1), args.get(2)) {
+                    let guild_id = msg.guild_id.ok_or("Not in a guild")?;
+                    
+                    let user_id = if let Some(id) = Self::extract_user_id(user_mention) {
+                        UserId::new(id)
+                    } else {
+                        return Ok(());
+                    };
+                    
+                    let duration_secs: i64 = duration_str.parse()?;
+                    
+                    use serenity::model::Timestamp;
+                    
+                    let mut member = ctx.http.get_member(guild_id, user_id).await?;
+                    let timeout_until = Timestamp::from_unix_timestamp(
+                        chrono::Utc::now().timestamp() + duration_secs
+                    )?;
+                    
+                    member.disable_communication_until_datetime(&ctx.http, timeout_until).await?;
+                    msg.channel_id.say(&ctx.http, format!("🔇 Muted <@{}> for {}s: {}", user_id, duration_secs, reason)).await?;
+                }
+            }
+            "UNTIMEOUT" => {
+                if let Some(&user_mention) = args.get(0) {
+                    let guild_id = msg.guild_id.ok_or("Not in a guild")?;
+                    
+                    let user_id = if let Some(id) = Self::extract_user_id(user_mention) {
+                        UserId::new(id)
+                    } else {
+                        return Ok(());
+                    };
+                    
+                    let mut member = ctx.http.get_member(guild_id, user_id).await?;
+                    member.enable_communication(&ctx.http).await?;
+                    msg.channel_id.say(&ctx.http, format!("🔊 Unmuted <@{}>", user_id)).await?;
+                }
+            }
+            "UNBAN" => {
+                if let (Some(&user_mention), Some(&reason)) = (args.get(0), args.get(1)) {
+                    let guild_id = msg.guild_id.ok_or("Not in a guild")?;
+                    
+                    let user_id = if let Some(id) = Self::extract_user_id(user_mention) {
+                        UserId::new(id)
+                    } else {
+                        return Ok(());
+                    };
+                    
+                    ctx.http.remove_ban(guild_id, user_id, Some(reason)).await?;
+                    msg.channel_id.say(&ctx.http, format!("✅ Unbanned user: {}", reason)).await?;
+                }
+            }
+            "ADD_ROLE" => {
+                if let (Some(&user_mention), Some(&role_mention), Some(&reason)) = (args.get(0), args.get(1), args.get(2)) {
+                    let guild_id = msg.guild_id.ok_or("Not in a guild")?;
+                    
+                    let user_id = if let Some(id) = Self::extract_user_id(user_mention) {
+                        UserId::new(id)
+                    } else {
+                        return Ok(());
+                    };
+                    
+                    // Extract role ID from <@&123> or parse directly
+                    let role_id = if let Some(id) = role_mention.trim_start_matches("<@&").trim_end_matches(">").parse().ok() {
+                        RoleId::new(id)
+                    } else {
+                        return Ok(());
+                    };
+                    
+                    let mut member = ctx.http.get_member(guild_id, user_id).await?;
+                    member.add_role(&ctx.http, role_id).await?;
+                    msg.channel_id.say(&ctx.http, format!("➕ Added role <@&{}> to <@{}>", role_id, user_id)).await?;
+                }
+            }
+            "REMOVE_ROLE" => {
+                if let (Some(&user_mention), Some(&role_mention), Some(&reason)) = (args.get(0), args.get(1), args.get(2)) {
+                    let guild_id = msg.guild_id.ok_or("Not in a guild")?;
+                    
+                    let user_id = if let Some(id) = Self::extract_user_id(user_mention) {
+                        UserId::new(id)
+                    } else {
+                        return Ok(());
+                    };
+                    
+                    let role_id = if let Some(id) = role_mention.trim_start_matches("<@&").trim_end_matches(">").parse().ok() {
+                        RoleId::new(id)
+                    } else {
+                        return Ok(());
+                    };
+                    
+                    let mut member = ctx.http.get_member(guild_id, user_id).await?;
+                    member.remove_role(&ctx.http, role_id).await?;
+                    msg.channel_id.say(&ctx.http, format!("➖ Removed role <@&{}> from <@{}>", role_id, user_id)).await?;
+                }
+            }
+            "REACT" => {
+                if let Some(&emoji) = args.get(0) {
+                    use serenity::model::channel::ReactionType;
+                    if let Ok(reaction) = emoji.parse::<ReactionType>() {
+                        msg.react(&ctx.http, reaction).await?;
+                    }
+                }
+            }
+            "SEND_DM" => {
+                if let (Some(&user_mention), Some(&message)) = (args.get(0), args.get(1)) {
+                    let user_id = if let Some(id) = Self::extract_user_id(user_mention) {
+                        UserId::new(id)
+                    } else {
+                        return Ok(());
+                    };
+                    
+                    user_id.create_dm_channel(&ctx.http).await?.say(&ctx.http, message).await?;
+                }
+            }
+            "SLOWMODE" => {
+                if let (Some(&channel_str), Some(&seconds_str)) = (args.get(0), args.get(1)) {
+                    let channel_id = if channel_str == "CURRENT_CHANNEL" {
+                        msg.channel_id
+                    } else {
+                        ChannelId::new(channel_str.parse()?)
+                    };
+                    
+                    let seconds: u16 = seconds_str.parse().unwrap_or(0);
+                    
+                    use serenity::builder::EditChannel;
+                    channel_id.edit(&ctx.http, EditChannel::new().rate_limit_per_user(seconds)).await?;
+                    
+                    if seconds == 0 {
+                        msg.channel_id.say(&ctx.http, "⏱️ Slowmode disabled").await?;
+                    } else {
+                        msg.channel_id.say(&ctx.http, format!("⏱️ Slowmode: {}s", seconds)).await?;
+                    }
+                }
+            }
+            "EMBED" => {
+                if let (Some(&title), Some(&description), Some(&color_str)) = (args.get(0), args.get(1), args.get(2)) {
+                    use serenity::builder::{CreateEmbed, CreateMessage};
+                    
+                    let color: u32 = color_str.parse().unwrap_or(0x3498db);
+                    let embed = CreateEmbed::new()
+                        .title(title)
+                        .description(description)
+                        .color(color);
+                    
+                    msg.channel_id.send_message(&ctx.http, CreateMessage::new().embed(embed)).await?;
+                }
+            }
+            "DELETE_MESSAGES" => {
+                if let (Some(&channel_str), Some(&count_str)) = (args.get(0), args.get(1)) {
+                    let channel_id = if channel_str == "CURRENT_CHANNEL" {
+                        msg.channel_id
+                    } else {
+                        ChannelId::new(channel_str.parse()?)
+                    };
+                    
+                    let count: u8 = count_str.parse().unwrap_or(10).min(100);
+                    
+                    let messages = channel_id.messages(&ctx.http, serenity::builder::GetMessages::new().limit(count)).await?;
+                    
+                    if !messages.is_empty() {
+                        if messages.len() == 1 {
+                            messages[0].delete(&ctx.http).await?;
+                        } else {
+                            channel_id.delete_messages(&ctx.http, &messages).await?;
+                        }
+                        msg.channel_id.say(&ctx.http, format!("🗑️ Deleted {} messages", messages.len())).await?;
+                    }
+                }
+            }
+            _ => {}
+        }
+        
+        Ok(())
+    }
+}
+
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
@@ -70,8 +296,44 @@ impl EventHandler for Handler {
         // Execute command handler
         let handlers = self.state.command_handlers.read().await;
         if let Some(handler_script) = handlers.get(command) {
+            // Create a wrapper script that injects command variables at the top
+            let wrapper = format!(
+                "let DISCORD_COMMAND = \"{}\"\nlet DISCORD_ARGS = \"{}\"\nlet DISCORD_AUTHOR = \"{}\"\n\n",
+                command, 
+                args.replace("\"", "\\\"").replace("\n", "\\n"), 
+                msg.author.name.replace("\"", "\\\"")
+            );
+            
+            // Read the handler script
+            let handler_content = match fs::read_to_string(handler_script) {
+                Ok(content) => content,
+                Err(e) => {
+                    eprintln!("Error reading handler {}: {}", handler_script, e);
+                    return;
+                }
+            };
+            
+            // Remove any existing DISCORD_* variable definitions from the handler
+            let mut filtered_content = String::new();
+            for line in handler_content.lines() {
+                if !line.trim().starts_with("let DISCORD_COMMAND") 
+                    && !line.trim().starts_with("let DISCORD_ARGS")
+                    && !line.trim().starts_with("let DISCORD_AUTHOR") {
+                    filtered_content.push_str(line);
+                    filtered_content.push('\n');
+                }
+            }
+            
+            // Write combined script
+            let wrapper_file = "/tmp/m5rcode_discord_wrapper.m5";
+            let full_script = format!("{}{}", wrapper, filtered_content);
+            if let Err(e) = fs::write(wrapper_file, full_script) {
+                eprintln!("Error writing wrapper: {}", e);
+                return;
+            }
+            
             let output = Command::new("m5repl")
-                .arg(handler_script)
+                .arg(wrapper_file)
                 .env("DISCORD_EVENT", event_file)
                 .env("DISCORD_COMMAND", command)
                 .env("DISCORD_ARGS", args)
@@ -87,10 +349,23 @@ impl EventHandler for Handler {
                     eprintln!("Handler error: {}", stderr);
                 }
                 
-                let response = stdout.trim();
-                if !response.is_empty() {
-                    if let Err(e) = msg.channel_id.say(&ctx.http, response).await {
-                        eprintln!("Error sending message: {:?}", e);
+                // Process API calls and regular responses
+                for line in stdout.lines() {
+                    let line = line.trim();
+                    if line.is_empty() {
+                        continue;
+                    }
+                    
+                    // Handle API calls
+                    if line.starts_with("[API:") {
+                        if let Err(e) = self.handle_api_call(&ctx, &msg, line).await {
+                            eprintln!("API call error: {}", e);
+                        }
+                    } else {
+                        // Regular message response
+                        if let Err(e) = msg.channel_id.say(&ctx.http, line).await {
+                            eprintln!("Error sending message: {:?}", e);
+                        }
                     }
                 }
             }
@@ -127,8 +402,15 @@ async fn main() {
         println!("📝 Single-file bot mode: {}", bot_file);
         let mut handlers = std::collections::HashMap::new();
         
-        // Register common commands to use the same file
-        for cmd in &["ping", "hello", "info", "calc", "help", "math"] {
+        // Register all commands to use the same file
+        for cmd in &[
+            "ping", "hello", "info", "calc", "help", "math",
+            "kick", "ban", "unban", "mute", "unmute", 
+            "warn", "warnings", "clearwarns",
+            "purge", "slowmode", "lock", "unlock",
+            "userinfo", "serverinfo", "modlogs",
+            "addrole", "removerole", "automod"
+        ] {
             handlers.insert(cmd.to_string(), bot_file.to_string());
             println!("📝 Registered command: !{} -> {}", cmd, bot_file);
         }
