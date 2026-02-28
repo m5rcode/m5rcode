@@ -1,0 +1,73 @@
+# Runtime integration tests
+import std.test
+import std.io
+import std.collections
+
+test("list operations", || {
+    list = List.new()
+    list.push(1)
+    list.push(2)
+    list.push(3)
+    
+    test.assert_eq(list.len(), 3, "List should have 3 elements")
+    
+    item = list.pop()
+    test.assert_eq(item, 3, "Popped item should be 3")
+    test.assert_eq(list.len(), 2, "List should have 2 elements after pop")
+})
+
+test("dict operations", || {
+    map = Dict.new()
+    map.set("name", "Alice")
+    map.set("age", 30)
+    
+    test.assert_eq(map.get("name"), "Alice", "Dict get works")
+    test.assert_eq(map.len(), 2, "Dict should have 2 entries")
+    
+    map.remove("age")
+    test.assert_eq(map.len(), 1, "Dict should have 1 entry after remove")
+})
+
+test("fibonacci function", || {
+    fn fib(n) {
+        if n <= 1 {
+            return n
+        }
+        return fib(n - 1) + fib(n - 2)
+    }
+    
+    test.assert_eq(fib(0), 0, "fib(0) = 0")
+    test.assert_eq(fib(1), 1, "fib(1) = 1")
+    test.assert_eq(fib(5), 5, "fib(5) = 5")
+    test.assert_eq(fib(10), 55, "fib(10) = 55")
+})
+
+test("closure capture", || {
+    fn make_adder(x) {
+        return |y| x + y
+    }
+    
+    add5 = make_adder(5)
+    result = add5(10)
+    test.assert_eq(result, 15, "Closure should capture x=5")
+})
+
+test("class instantiation", || {
+    class Point {
+        x: int
+        y: int
+        
+        fn new(x, y) {
+            return Point { x: x, y: y }
+        }
+        
+        fn sum() {
+            return self.x + self.y
+        }
+    }
+    
+    p = Point.new(3, 4)
+    test.assert_eq(p.x, 3, "Point x should be 3")
+    test.assert_eq(p.y, 4, "Point y should be 4")
+    test.assert_eq(p.sum(), 7, "Point sum should be 7")
+})

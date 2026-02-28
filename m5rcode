@@ -1,0 +1,80 @@
+#!/bin/bash
+# m5rcode - Unified command-line interface
+
+VERSION="0.1.0"
+
+# Detect if running from source or installed
+if [ -d "$(dirname "$0")/target/release" ]; then
+    # Running from source
+    BIN_DIR="$(cd "$(dirname "$0")" && pwd)/target/release"
+else
+    # Installed system-wide
+    BIN_DIR="$(dirname "$0")"
+fi
+
+show_help() {
+    cat << EOF
+m5rcode v$VERSION - Modern programming language
+
+USAGE:
+    m5rcode <command> [options]
+
+COMMANDS:
+    run <file>          Run a .m5 file
+    repl                Start interactive REPL
+    compile <file>      Compile a .m5 file
+    fmt <file>          Format a .m5 file
+    lint <file>         Lint a .m5 file
+    ide                 Launch IDE
+    lsp                 Start LSP server
+    version             Show version
+    help                Show this help
+
+EXAMPLES:
+    m5rcode run hello.m5
+    m5rcode repl
+    m5rcode fmt mycode.m5
+    m5rcode compile app.m5
+
+For more information, visit: https://github.com/m5rcode/m5rcode
+EOF
+}
+
+case "${1:-help}" in
+    run)
+        shift
+        exec "${BIN_DIR}/m5repl" "$@"
+        ;;
+    repl)
+        exec "${BIN_DIR}/m5repl"
+        ;;
+    compile)
+        shift
+        exec "${BIN_DIR}/m5r" "$@"
+        ;;
+    fmt|format)
+        shift
+        exec "${BIN_DIR}/m5fmt" "$@"
+        ;;
+    lint)
+        shift
+        exec "${BIN_DIR}/m5lint" "$@"
+        ;;
+    ide)
+        exec "${BIN_DIR}/m5idle"
+        ;;
+    lsp)
+        exec "${BIN_DIR}/m5lsp"
+        ;;
+    version|-v|--version)
+        echo "m5rcode v$VERSION"
+        ;;
+    help|-h|--help)
+        show_help
+        ;;
+    *)
+        echo "Unknown command: $1"
+        echo "Run 'm5rcode help' for usage information"
+        exit 1
+        ;;
+esac

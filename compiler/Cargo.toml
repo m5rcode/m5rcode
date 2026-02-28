@@ -1,0 +1,21 @@
+[package]
+name = "m5rcode"
+version = "0.1.0"
+edition = "2021"
+authors = ["m5rcode contributors"]
+description = "m5rcode programming language compiler"
+license = "MIT OR Apache-2.0"
+
+[[bin]]
+name = "m5r"
+path = "src/main.rs"
+
+[dependencies]
+
+[lib]
+name = "m5rcode"
+path = "src/lib.rs"
+
+[profile.release]
+opt-level = 3
+lto = true

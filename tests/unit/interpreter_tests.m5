@@ -1,0 +1,44 @@
+# Interpreter tests
+import std.test
+import std.io
+
+test("evaluate integer arithmetic", || {
+    result = 2 + 3
+    test.assert_eq(result, 5, "2 + 3 should equal 5")
+    
+    result = 10 - 4
+    test.assert_eq(result, 6, "10 - 4 should equal 6")
+    
+    result = 3 * 4
+    test.assert_eq(result, 12, "3 * 4 should equal 12")
+})
+
+test("evaluate string concatenation", || {
+    result = "hello" + " " + "world"
+    test.assert_eq(result, "hello world", "String concat works")
+})
+
+test("evaluate function call", || {
+    fn double(x) {
+        return x * 2
+    }
+    
+    result = double(21)
+    test.assert_eq(result, 42, "Function call works")
+})
+
+test("evaluate if statement", || {
+    x = 10
+    result = if x > 5 { "big" } else { "small" }
+    test.assert_eq(result, "big", "If expression works")
+})
+
+test("evaluate while loop", || {
+    sum = 0
+    i = 1
+    while i <= 5 {
+        sum = sum + i
+        i = i + 1
+    }
+    test.assert_eq(sum, 15, "While loop works")
+})

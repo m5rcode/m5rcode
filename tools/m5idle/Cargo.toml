@@ -1,0 +1,13 @@
+[package]
+name = "m5idle"
+version = "0.1.0"
+edition = "2021"
+authors = ["m5rcode contributors"]
+description = "GTK-based IDE for m5rcode"
+license = "MIT OR Apache-2.0"
+
+[[bin]]
+name = "m5idle"
+path = "src/main.rs"
+
+[dependencies]

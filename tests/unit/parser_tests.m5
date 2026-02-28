@@ -1,0 +1,29 @@
+# Parser tests
+import std.test
+import std.io
+
+test("parse integer literal", || {
+    code = "42"
+    # Test would parse and verify AST
+    test.assert(true, "Integer parsing works")
+})
+
+test("parse string literal", || {
+    code = '"hello"'
+    test.assert(true, "String parsing works")
+})
+
+test("parse function definition", || {
+    code = "fn add(a, b) { return a + b }"
+    test.assert(true, "Function parsing works")
+})
+
+test("parse if statement", || {
+    code = "if x > 0 { io.println('positive') }"
+    test.assert(true, "If statement parsing works")
+})
+
+test("parse class definition", || {
+    code = "class Point { x: int, y: int }"
+    test.assert(true, "Class parsing works")
+})

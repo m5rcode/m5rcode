@@ -1,0 +1,28 @@
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# m5rcode
+*.m5c
+*.m5o
+
+# Build artifacts
+*.tar.gz
+*.pkg.tar.zst
+release/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
