@@ -1,0 +1,69 @@
+# discord.m5 - Discord bot library for m5rcode
+# Mimics discord.py API
+
+import std.io
+
+# Discord client class
+class Client {
+    fn new() {
+        return {
+            token: "",
+            prefix: "!",
+            commands: {},
+            event_handlers: {}
+        }
+    }
+    
+    fn set_token(self, token) {
+        self.token = token
+    }
+    
+    fn set_prefix(self, prefix) {
+        self.prefix = prefix
+    }
+    
+    fn command(self, name, handler) {
+        self.commands[name] = handler
+    }
+    
+    fn on(self, event, handler) {
+        self.event_handlers[event] = handler
+    }
+    
+    fn run(self) {
+        io.println("🤖 Starting Discord bot...")
+        io.println("Token: " + self.token)
+        io.println("Prefix: " + self.prefix)
+        io.println("Commands: " + toStr(list.len(self.commands)))
+    }
+}
+
+# Message class
+class Message {
+    fn new(data) {
+        return {
+            content: data.content,
+            author: data.author,
+            author_id: data.author_id,
+            channel_id: data.channel_id,
+            guild_id: data.guild_id
+        }
+    }
+    
+    fn reply(self, content) {
+        io.println("[REPLY] " + content)
+        return content
+    }
+}
+
+# Helper functions
+fn create_client() {
+    return Client.new()
+}
+
+fn parse_event() {
+    # Read event from environment
+    let event_file = "/tmp/m5rcode_discord_event.json"
+    # TODO: Implement JSON parsing
+    return {}
+}

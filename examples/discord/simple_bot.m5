@@ -1,0 +1,84 @@
+# Simple Discord bot example in m5rcode
+import std.io
+
+io.println("🤖 m5rcode Discord Bot v0.1.0")
+io.println("========================================")
+
+# Bot configuration
+let bot_name = "m5rBot"
+let prefix = "!"
+
+io.println("Bot Name: " + bot_name)
+io.println("Prefix: " + prefix)
+io.println("")
+
+# Commands
+fn handle_ping() {
+    io.println("🏓 Pong!")
+}
+
+fn handle_hello() {
+    io.println("👋 Hello from m5rcode!")
+}
+
+fn handle_calc() {
+    let result = 2 + 2
+    io.println("🔢 Calculator: 2 + 2 = " + toStr(result))
+}
+
+fn handle_info() {
+    io.println("📊 Bot Information:")
+    io.println("  Name: m5rBot")
+    io.println("  Version: 0.1.0")
+    io.println("  Language: m5rcode v0.3.1")
+    io.println("  Commands: ping, hello, calc, info")
+}
+
+fn handle_math(a, b) {
+    io.println("➕ " + toStr(a) + " + " + toStr(b) + " = " + toStr(a + b))
+    io.println("➖ " + toStr(a) + " - " + toStr(b) + " = " + toStr(a - b))
+    io.println("✖️  " + toStr(a) + " * " + toStr(b) + " = " + toStr(a * b))
+}
+
+# Message handler
+fn on_message(author, content) {
+    io.println("[" + author + "] " + content)
+    
+    # Simple command routing
+    let cmd = str.trim(content)
+    
+    # Note: String comparison in m5rcode
+    # For now, we'll use a simple approach
+    io.println("  → Processing command...")
+}
+
+# Test the bot
+io.println("📝 Testing Commands:")
+io.println("")
+
+io.println("Command: !ping")
+handle_ping()
+io.println("")
+
+io.println("Command: !hello")
+handle_hello()
+io.println("")
+
+io.println("Command: !calc")
+handle_calc()
+io.println("")
+
+io.println("Command: !info")
+handle_info()
+io.println("")
+
+io.println("Command: !math 10 5")
+handle_math(10, 5)
+io.println("")
+
+io.println("✅ All commands tested successfully!")
+io.println("")
+io.println("💡 To connect to Discord:")
+io.println("   1. Get bot token from https://discord.com/developers")
+io.println("   2. Enable MESSAGE_CONTENT intent")
+io.println("   3. Run: m5rcode-discord <TOKEN> simple_bot.m5")
