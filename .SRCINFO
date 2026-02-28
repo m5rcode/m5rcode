@@ -1,0 +1,15 @@
+pkgbase = m5rcode
+	pkgdesc = Modern programming language combining Python, C, Java, Rust, and Ruby features
+	pkgver = 0.3.2
+	pkgrel = 1
+	url = https://github.com/m5rcode/m5rcode
+	arch = x86_64
+	license = MIT
+	license = Apache-2.0
+	makedepends = rust
+	makedepends = cargo
+	depends = gcc-libs
+	source = m5rcode-0.3.2.tar.gz::https://github.com/m5rcode/m5rcode/archive/v0.3.2.tar.gz
+	sha256sums = f34e155468c3f3ce19ee3ea9b4e6bec206836902d2b64c84e3ea221f0a0f9766
+
+pkgname = m5rcode
