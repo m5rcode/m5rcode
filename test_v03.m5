@@ -1,0 +1,25 @@
+import std.io
+
+io.println("=== m5rcode v0.3.0 Test ===")
+
+let x = 16
+io.println("sqrt(16) = " + toStr(math.sqrt(x)))
+
+let neg = 0 - 5
+io.println("abs(-5) = " + toStr(math.abs(neg)))
+
+io.println("pow(2, 3) = " + toStr(math.pow(2, 3)))
+
+let text = "  Hello World  "
+io.println("Original: '" + text + "'")
+io.println("Trimmed: '" + str.trim(text) + "'")
+io.println("Upper: " + str.upper("hello"))
+io.println("Lower: " + str.lower("WORLD"))
+
+io.println("typeof(42) = " + typeof(42))
+io.println("typeof('hello') = " + typeof("hello"))
+
+let numbers = [1, 2, 3, 4, 5]
+io.println("List length: " + toStr(list.len(numbers)))
+
+io.println("=== All tests passed! ===")

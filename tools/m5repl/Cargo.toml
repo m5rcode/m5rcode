@@ -1,6 +1,6 @@
 [package]
 name = "m5repl"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["m5rcode contributors"]
 description = "Interactive REPL for m5rcode"

@@ -1,6 +1,6 @@
 # Maintainer: m5rcode contributors
 pkgname=m5rcode
-pkgver=0.2.0
+pkgver=0.3.0
 pkgrel=1
 pkgdesc="Modern programming language combining Python, C, Java, HolyC, Rust, and Ruby"
 arch=('x86_64')

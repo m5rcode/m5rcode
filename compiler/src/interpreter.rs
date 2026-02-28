@@ -1,4 +1,4 @@
-/// Interpreter module - Executes parsed AST
+/// Interpreter module - Executes parsed AST with enhanced error handling
 use crate::parser::{Expr, Stmt};
 use std::collections::HashMap;
 use std::fmt;
@@ -15,6 +15,34 @@ pub enum Value {
     Function { params: Vec<String>, body: Vec<Stmt>, closure: HashMap<String, Value> },
     Class { name: String, fields: Vec<(String, String)>, methods: HashMap<String, Value> },
     Instance { class_name: String, fields: HashMap<String, Value> },
+    NativeFunction { name: String, arity: usize },
+}
+
+#[derive(Debug, Clone)]
+pub struct RuntimeError {
+    pub message: String,
+    pub line: Option<usize>,
+    pub column: Option<usize>,
+}
+
+impl RuntimeError {
+    pub fn new(message: String) -> Self {
+        RuntimeError { message, line: None, column: None }
+    }
+    
+    pub fn with_location(message: String, line: usize, column: usize) -> Self {
+        RuntimeError { message, line: Some(line), column: Some(column) }
+    }
+}
+
+impl fmt::Display for RuntimeError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if let (Some(line), Some(col)) = (self.line, self.column) {
+            write!(f, "Runtime error at line {}, column {}: {}", line, col, self.message)
+        } else {
+            write!(f, "Runtime error: {}", self.message)
+        }
+    }
 }
 
 impl fmt::Display for Value {
@@ -44,6 +72,39 @@ impl fmt::Display for Value {
             Value::Function { .. } => write!(f, "<function>"),
             Value::Class { name, .. } => write!(f, "<class {}>", name),
             Value::Instance { class_name, .. } => write!(f, "<{} instance>", class_name),
+            Value::NativeFunction { name, .. } => write!(f, "<native function {}>", name),
+        }
+    }
+}
+
+impl Value {
+    /// Type name for better error messages
+    pub fn type_name(&self) -> &str {
+        match self {
+            Value::Int(_) => "int",
+            Value::Float(_) => "float",
+            Value::String(_) => "string",
+            Value::Bool(_) => "bool",
+            Value::Null => "null",
+            Value::List(_) => "list",
+            Value::Object(_) => "object",
+            Value::Function { .. } => "function",
+            Value::Class { .. } => "class",
+            Value::Instance { .. } => "instance",
+            Value::NativeFunction { .. } => "native_function",
+        }
+    }
+    
+    /// Convert to boolean for truthiness checks
+    pub fn is_truthy(&self) -> bool {
+        match self {
+            Value::Bool(b) => *b,
+            Value::Null => false,
+            Value::Int(0) => false,
+            Value::Float(f) if *f == 0.0 => false,
+            Value::String(s) if s.is_empty() => false,
+            Value::List(l) if l.is_empty() => false,
+            _ => true,
         }
     }
 }
@@ -56,13 +117,52 @@ pub struct Interpreter {
 impl Interpreter {
     pub fn new() -> Self {
         let mut globals = HashMap::new();
+        
+        // Enhanced std.io module
         let mut io_methods = HashMap::new();
-        io_methods.insert("println".to_string(), Value::Function {
-            params: vec!["msg".to_string()],
-            body: vec![],
-            closure: HashMap::new(),
-        });
+        io_methods.insert("println".to_string(), Value::NativeFunction { name: "println".to_string(), arity: 1 });
+        io_methods.insert("print".to_string(), Value::NativeFunction { name: "print".to_string(), arity: 1 });
+        io_methods.insert("input".to_string(), Value::NativeFunction { name: "input".to_string(), arity: 1 });
         globals.insert("io".to_string(), Value::Object(io_methods));
+        
+        // std.math module
+        let mut math_methods = HashMap::new();
+        math_methods.insert("abs".to_string(), Value::NativeFunction { name: "abs".to_string(), arity: 1 });
+        math_methods.insert("sqrt".to_string(), Value::NativeFunction { name: "sqrt".to_string(), arity: 1 });
+        math_methods.insert("pow".to_string(), Value::NativeFunction { name: "pow".to_string(), arity: 2 });
+        math_methods.insert("floor".to_string(), Value::NativeFunction { name: "floor".to_string(), arity: 1 });
+        math_methods.insert("ceil".to_string(), Value::NativeFunction { name: "ceil".to_string(), arity: 1 });
+        math_methods.insert("round".to_string(), Value::NativeFunction { name: "round".to_string(), arity: 1 });
+        math_methods.insert("min".to_string(), Value::NativeFunction { name: "min".to_string(), arity: 2 });
+        math_methods.insert("max".to_string(), Value::NativeFunction { name: "max".to_string(), arity: 2 });
+        globals.insert("math".to_string(), Value::Object(math_methods));
+        
+        // std.str module (renamed from string to avoid keyword conflict)
+        let mut str_methods = HashMap::new();
+        str_methods.insert("len".to_string(), Value::NativeFunction { name: "len".to_string(), arity: 1 });
+        str_methods.insert("upper".to_string(), Value::NativeFunction { name: "upper".to_string(), arity: 1 });
+        str_methods.insert("lower".to_string(), Value::NativeFunction { name: "lower".to_string(), arity: 1 });
+        str_methods.insert("trim".to_string(), Value::NativeFunction { name: "trim".to_string(), arity: 1 });
+        str_methods.insert("split".to_string(), Value::NativeFunction { name: "split".to_string(), arity: 2 });
+        str_methods.insert("join".to_string(), Value::NativeFunction { name: "join".to_string(), arity: 2 });
+        globals.insert("str".to_string(), Value::Object(str_methods));
+        
+        // std.list module
+        let mut list_methods = HashMap::new();
+        list_methods.insert("len".to_string(), Value::NativeFunction { name: "list_len".to_string(), arity: 1 });
+        list_methods.insert("push".to_string(), Value::NativeFunction { name: "push".to_string(), arity: 2 });
+        list_methods.insert("pop".to_string(), Value::NativeFunction { name: "pop".to_string(), arity: 1 });
+        list_methods.insert("map".to_string(), Value::NativeFunction { name: "map".to_string(), arity: 2 });
+        list_methods.insert("filter".to_string(), Value::NativeFunction { name: "filter".to_string(), arity: 2 });
+        list_methods.insert("reduce".to_string(), Value::NativeFunction { name: "reduce".to_string(), arity: 3 });
+        globals.insert("list".to_string(), Value::Object(list_methods));
+        
+        // Global utility functions
+        globals.insert("typeof".to_string(), Value::NativeFunction { name: "type".to_string(), arity: 1 });
+        globals.insert("toStr".to_string(), Value::NativeFunction { name: "str".to_string(), arity: 1 });
+        globals.insert("toInt".to_string(), Value::NativeFunction { name: "int".to_string(), arity: 1 });
+        globals.insert("toFloat".to_string(), Value::NativeFunction { name: "float".to_string(), arity: 1 });
+        globals.insert("toBool".to_string(), Value::NativeFunction { name: "bool".to_string(), arity: 1 });
         
         Interpreter {
             globals,
@@ -337,6 +437,12 @@ impl Interpreter {
     
     fn call_function(&mut self, func: Value, args: Vec<Value>) -> Result<Value, String> {
         match func {
+            Value::NativeFunction { name, arity } => {
+                if args.len() != arity {
+                    return Err(format!("Function '{}' expects {} arguments, got {}", name, arity, args.len()));
+                }
+                self.call_native(&name, args)
+            },
             Value::Function { params, body, closure } => {
                 if body.is_empty() {
                     if params.len() == 1 && params[0] == "msg" {
@@ -395,17 +501,211 @@ impl Interpreter {
                 }
                 Err(format!("Class '{}' has no constructor", name))
             },
-            _ => Err("Not a function".to_string()),
+            _ => Err(format!("Cannot call value of type '{}'", func.type_name())),
+        }
+    }
+    
+    fn call_native(&mut self, name: &str, args: Vec<Value>) -> Result<Value, String> {
+        match name {
+            // IO functions
+            "println" => {
+                if let Some(arg) = args.first() {
+                    println!("{}", arg);
+                }
+                Ok(Value::Null)
+            },
+            "print" => {
+                if let Some(arg) = args.first() {
+                    print!("{}", arg);
+                }
+                Ok(Value::Null)
+            },
+            "input" => {
+                if let Some(Value::String(prompt)) = args.first() {
+                    print!("{}", prompt);
+                    use std::io::{self, Write};
+                    io::stdout().flush().unwrap();
+                    let mut input = String::new();
+                    io::stdin().read_line(&mut input).unwrap();
+                    Ok(Value::String(input.trim().to_string()))
+                } else {
+                    Err("input() requires a string prompt".to_string())
+                }
+            },
+            
+            // Math functions
+            "abs" => {
+                match args.first() {
+                    Some(Value::Int(n)) => Ok(Value::Int(n.abs())),
+                    Some(Value::Float(f)) => Ok(Value::Float(f.abs())),
+                    _ => Err("abs() requires a number".to_string()),
+                }
+            },
+            "sqrt" => {
+                match args.first() {
+                    Some(Value::Int(n)) => Ok(Value::Float((*n as f64).sqrt())),
+                    Some(Value::Float(f)) => Ok(Value::Float(f.sqrt())),
+                    _ => Err("sqrt() requires a number".to_string()),
+                }
+            },
+            "pow" => {
+                match (&args[0], &args[1]) {
+                    (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a.pow(*b as u32))),
+                    (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a.powf(*b))),
+                    (Value::Int(a), Value::Float(b)) => Ok(Value::Float((*a as f64).powf(*b))),
+                    (Value::Float(a), Value::Int(b)) => Ok(Value::Float(a.powi(*b as i32))),
+                    _ => Err("pow() requires two numbers".to_string()),
+                }
+            },
+            "floor" => {
+                match args.first() {
+                    Some(Value::Float(f)) => Ok(Value::Int(f.floor() as i64)),
+                    Some(Value::Int(n)) => Ok(Value::Int(*n)),
+                    _ => Err("floor() requires a number".to_string()),
+                }
+            },
+            "ceil" => {
+                match args.first() {
+                    Some(Value::Float(f)) => Ok(Value::Int(f.ceil() as i64)),
+                    Some(Value::Int(n)) => Ok(Value::Int(*n)),
+                    _ => Err("ceil() requires a number".to_string()),
+                }
+            },
+            "round" => {
+                match args.first() {
+                    Some(Value::Float(f)) => Ok(Value::Int(f.round() as i64)),
+                    Some(Value::Int(n)) => Ok(Value::Int(*n)),
+                    _ => Err("round() requires a number".to_string()),
+                }
+            },
+            "min" => {
+                match (&args[0], &args[1]) {
+                    (Value::Int(a), Value::Int(b)) => Ok(Value::Int(*a.min(b))),
+                    (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a.min(*b))),
+                    _ => Err("min() requires two numbers of the same type".to_string()),
+                }
+            },
+            "max" => {
+                match (&args[0], &args[1]) {
+                    (Value::Int(a), Value::Int(b)) => Ok(Value::Int(*a.max(b))),
+                    (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a.max(*b))),
+                    _ => Err("max() requires two numbers of the same type".to_string()),
+                }
+            },
+            
+            // String functions
+            "len" => {
+                match args.first() {
+                    Some(Value::String(s)) => Ok(Value::Int(s.len() as i64)),
+                    _ => Err("len() requires a string".to_string()),
+                }
+            },
+            "upper" => {
+                match args.first() {
+                    Some(Value::String(s)) => Ok(Value::String(s.to_uppercase())),
+                    _ => Err("upper() requires a string".to_string()),
+                }
+            },
+            "lower" => {
+                match args.first() {
+                    Some(Value::String(s)) => Ok(Value::String(s.to_lowercase())),
+                    _ => Err("lower() requires a string".to_string()),
+                }
+            },
+            "trim" => {
+                match args.first() {
+                    Some(Value::String(s)) => Ok(Value::String(s.trim().to_string())),
+                    _ => Err("trim() requires a string".to_string()),
+                }
+            },
+            "split" => {
+                match (&args[0], &args[1]) {
+                    (Value::String(s), Value::String(delim)) => {
+                        let parts: Vec<Value> = s.split(delim.as_str())
+                            .map(|p| Value::String(p.to_string()))
+                            .collect();
+                        Ok(Value::List(parts))
+                    },
+                    _ => Err("split() requires two strings".to_string()),
+                }
+            },
+            "join" => {
+                match (&args[0], &args[1]) {
+                    (Value::List(items), Value::String(sep)) => {
+                        let strings: Result<Vec<String>, String> = items.iter()
+                            .map(|v| match v {
+                                Value::String(s) => Ok(s.clone()),
+                                _ => Err("join() requires a list of strings".to_string()),
+                            })
+                            .collect();
+                        Ok(Value::String(strings?.join(sep)))
+                    },
+                    _ => Err("join() requires a list and a string".to_string()),
+                }
+            },
+            
+            // List functions
+            "list_len" => {
+                match args.first() {
+                    Some(Value::List(l)) => Ok(Value::Int(l.len() as i64)),
+                    _ => Err("list.len() requires a list".to_string()),
+                }
+            },
+            
+            // Type conversion functions
+            "type" => {
+                if let Some(val) = args.first() {
+                    Ok(Value::String(val.type_name().to_string()))
+                } else {
+                    Ok(Value::String("null".to_string()))
+                }
+            },
+            "str" => {
+                if let Some(val) = args.first() {
+                    Ok(Value::String(format!("{}", val)))
+                } else {
+                    Ok(Value::String("null".to_string()))
+                }
+            },
+            "int" => {
+                match args.first() {
+                    Some(Value::Int(n)) => Ok(Value::Int(*n)),
+                    Some(Value::Float(f)) => Ok(Value::Int(*f as i64)),
+                    Some(Value::String(s)) => {
+                        s.parse::<i64>()
+                            .map(Value::Int)
+                            .map_err(|_| format!("Cannot convert '{}' to int", s))
+                    },
+                    Some(Value::Bool(b)) => Ok(Value::Int(if *b { 1 } else { 0 })),
+                    _ => Err("Cannot convert to int".to_string()),
+                }
+            },
+            "float" => {
+                match args.first() {
+                    Some(Value::Float(f)) => Ok(Value::Float(*f)),
+                    Some(Value::Int(n)) => Ok(Value::Float(*n as f64)),
+                    Some(Value::String(s)) => {
+                        s.parse::<f64>()
+                            .map(Value::Float)
+                            .map_err(|_| format!("Cannot convert '{}' to float", s))
+                    },
+                    _ => Err("Cannot convert to float".to_string()),
+                }
+            },
+            "bool" => {
+                if let Some(val) = args.first() {
+                    Ok(Value::Bool(val.is_truthy()))
+                } else {
+                    Ok(Value::Bool(false))
+                }
+            },
+            
+            _ => Err(format!("Unknown native function: {}", name)),
         }
     }
     
     fn is_truthy(&self, val: &Value) -> bool {
-        match val {
-            Value::Bool(b) => *b,
-            Value::Null => false,
-            Value::Int(0) => false,
-            _ => true,
-        }
+        val.is_truthy()
     }
     
     fn get_var(&self, name: &str) -> Result<Value, String> {
