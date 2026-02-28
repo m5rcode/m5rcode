@@ -2,6 +2,14 @@
 
 **m5rcode** (pronounced "em-five-er-code") is a modern programming language combining the best features of Python, C, Java, HolyC, Rust, and Ruby. It features gradual typing, hybrid memory management (GC + optional ownership), and a focus on developer productivity.
 
+## ✨ What's New in v0.3.0
+
+- **Comprehensive Standard Library**: 20+ built-in functions for math, strings, lists, and I/O
+- **Enhanced LSP**: Semantic analysis, better diagnostics, context-aware completions
+- **Native Functions**: Faster execution for built-in operations
+- **Type Introspection**: `typeof()`, `toStr()`, `toInt()`, `toFloat()`, `toBool()`
+- **Better Error Messages**: Runtime errors with line/column tracking
+
 ## Features
 
 - **Gradual Typing**: Optional static types with Hindley-Milner inference
