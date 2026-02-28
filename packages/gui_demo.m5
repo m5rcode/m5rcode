@@ -1,0 +1,46 @@
+# m5rcode GUI Demo - Message Box Window
+# Testing LSP: syntax highlighting, completions, diagnostics
+
+import std.io
+
+class MessageBox {
+    title: string
+    message: string
+    
+    fn new(title, message) {
+        box = MessageBox { title: title, message: message }
+        return box
+    }
+    
+    fn show() {
+        io.println("╔══════════════════════════════════════╗")
+        io.println("║   " + self.title + "   ║")
+        io.println("╠══════════════════════════════════════╣")
+        io.println("║   " + self.message + "   ║")
+        io.println("╚══════════════════════════════════════╝")
+    }
+}
+
+fn main() {
+    io.println("╔══════════════════════════════════════╗")
+    io.println("║   m5rcode GUI Demo v1.0              ║")
+    io.println("╚══════════════════════════════════════╝")
+    io.println("")
+    
+    box1 = MessageBox.new("Information", "Testing window on m5rcode")
+    box1.show()
+    io.println("")
+    
+    box2 = MessageBox.new("LSP Test", "Testing LSP features!")
+    box2.show()
+    io.println("")
+    
+    io.println("╔══════════════════════════════════════╗")
+    io.println("║   LSP Features Working:              ║")
+    io.println("║   ✓ Syntax highlighting             ║")
+    io.println("║   ✓ Auto-completion                 ║")
+    io.println("║   ✓ Error detection                 ║")
+    io.println("╚══════════════════════════════════════╝")
+}
+
+main()

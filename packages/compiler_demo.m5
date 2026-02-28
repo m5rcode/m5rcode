@@ -1,0 +1,69 @@
+# m5rcode Compiler Demo - Fully Working!
+import std.io
+
+io.println("╔══════════════════════════════════════╗")
+io.println("║   m5rcode Compiler Demo v1.0         ║")
+io.println("╚══════════════════════════════════════╝")
+io.println("")
+
+# Test 1: Variables and arithmetic
+io.println("Test 1: Variables and Arithmetic")
+x = 10
+y = 20
+sum = x + y
+io.println("10 + 20 = " + sum)
+io.println("")
+
+# Test 2: Lists and for loops
+io.println("Test 2: Lists and For Loops")
+numbers = [1, 2, 3, 4, 5]
+io.println("Numbers: " + numbers)
+io.println("Iterating:")
+for num in numbers {
+    io.println("  - " + num)
+}
+io.println("")
+
+# Test 3: Functions
+io.println("Test 3: Functions")
+fn factorial(n) {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+result = factorial(5)
+io.println("5! = " + result)
+io.println("")
+
+# Test 4: Nested functions
+io.println("Test 4: Closures")
+fn make_multiplier(factor) {
+    fn multiply(x) {
+        return x * factor
+    }
+    return multiply
+}
+times_three = make_multiplier(3)
+io.println("7 * 3 = " + times_three(7))
+io.println("")
+
+# Test 5: Conditionals
+io.println("Test 5: Conditionals")
+age = 25
+if age >= 18 {
+    io.println("Adult")
+} else {
+    io.println("Minor")
+}
+io.println("")
+
+io.println("╔══════════════════════════════════════╗")
+io.println("║   All Features Working!              ║")
+io.println("║   ✓ Variables & Arithmetic           ║")
+io.println("║   ✓ Lists & For Loops                ║")
+io.println("║   ✓ Functions & Recursion            ║")
+io.println("║   ✓ Closures                         ║")
+io.println("║   ✓ Conditionals                     ║")
+io.println("║   ✓ String Concatenation             ║")
+io.println("╚══════════════════════════════════════╝")

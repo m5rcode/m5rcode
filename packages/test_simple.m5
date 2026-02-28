@@ -1,0 +1,7 @@
+import std.io
+
+fn main() {
+    io.println("Hello, m5rcode!")
+}
+
+main()

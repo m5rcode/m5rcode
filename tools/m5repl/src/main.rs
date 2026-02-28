@@ -3,15 +3,16 @@ use std::io::{self, Write};
 use std::fs;
 use std::env;
 
-// Minimal implementation - links to compiler
+// Import the compiler library
+extern crate m5rcode;
+use m5rcode::{Lexer, Parser, Interpreter};
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     
     if args.len() > 1 {
-        // Run file
         run_file(&args[1]);
     } else {
-        // Interactive REPL
         repl();
     }
 }
@@ -23,18 +24,6 @@ fn run_file(filename: &str) {
             std::process::exit(1);
         });
     
-    // Simple built-in execution for hello world
-    if source.contains("io.println") {
-        // Extract string from println call
-        if let Some(start) = source.find("io.println(\"") {
-            let start = start + 12;
-            if let Some(end) = source[start..].find("\"") {
-                let message = &source[start..start + end];
-                println!("{}", message);
-                return;
-            }
-        }
-    }
     execute(&source);
 }
 
@@ -43,6 +32,7 @@ fn repl() {
     println!("Type 'exit' to quit\n");
     
     let mut buffer = String::new();
+    let mut interpreter = Interpreter::new();
     
     loop {
         print!(">>> ");
@@ -60,13 +50,11 @@ fn repl() {
             continue;
         }
         
-        // Handle multiline input
         buffer.push_str(line);
         buffer.push('\n');
         
-        // Try to execute
         if is_complete(&buffer) {
-            execute(&buffer);
+            execute_with_interpreter(&buffer, &mut interpreter);
             buffer.clear();
         } else {
             print!("... ");
@@ -85,59 +73,30 @@ fn is_complete(code: &str) -> bool {
 }
 
 fn execute(source: &str) {
-    // This would normally call the compiler/interpreter
-    // For now, handle basic built-in commands
-    
-    if source.trim().starts_with("import") {
-        // Handle imports
-        return;
-    }
-    
-    // Simple expression evaluation
-    if let Some(result) = eval_simple(source) {
-        println!("{}", result);
-    } else {
-        // Call actual compiler (stub)
-        println!("Execution not yet implemented");
-    }
+    let mut interpreter = Interpreter::new();
+    execute_with_interpreter(source, &mut interpreter);
 }
 
-fn eval_simple(source: &str) -> Option<String> {
-    let source = source.trim();
-    
-    // Handle simple arithmetic
-    if let Ok(num) = source.parse::<i64>() {
-        return Some(num.to_string());
-    }
-    
-    // Handle string literals
-    if source.starts_with('"') && source.ends_with('"') {
-        return Some(source[1..source.len()-1].to_string());
-    }
-    
-    // Handle simple expressions like "1 + 2"
-    if let Some(result) = eval_arithmetic(source) {
-        return Some(result.to_string());
-    }
-    
-    None
-}
-
-fn eval_arithmetic(expr: &str) -> Option<i64> {
-    let parts: Vec<&str> = expr.split_whitespace().collect();
-    if parts.len() == 3 {
-        let left = parts[0].parse::<i64>().ok()?;
-        let op = parts[1];
-        let right = parts[2].parse::<i64>().ok()?;
-        
-        match op {
-            "+" => Some(left + right),
-            "-" => Some(left - right),
-            "*" => Some(left * right),
-            "/" => Some(left / right),
-            _ => None,
+fn execute_with_interpreter(source: &str, interpreter: &mut Interpreter) {
+    let mut lexer = Lexer::new(source);
+    let tokens = match lexer.tokenize() {
+        Ok(t) => t,
+        Err(e) => {
+            eprintln!("Lexer error: {}", e);
+            return;
         }
-    } else {
-        None
+    };
+    
+    let mut parser = Parser::new(tokens);
+    let ast = match parser.parse() {
+        Ok(a) => a,
+        Err(e) => {
+            eprintln!("Parser error: {}", e);
+            return;
+        }
+    };
+    
+    if let Err(e) = interpreter.execute(&ast) {
+        eprintln!("Runtime error: {}", e);
     }
 }

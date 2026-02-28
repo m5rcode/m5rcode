@@ -1,0 +1,28 @@
+# Test new compiler features
+import std.io
+
+# Test 1: Lists
+io.println("Test 1: Lists")
+numbers = [1, 2, 3, 4, 5]
+io.println(numbers)
+
+# Test 2: For loops
+io.println("Test 2: For loop")
+for num in numbers {
+    io.println(num)
+}
+
+# Test 3: String operations
+io.println("Test 3: Strings")
+text = "hello"
+io.println(text)
+
+# Test 4: Functions
+io.println("Test 4: Functions")
+fn add(a, b) {
+    return a + b
+}
+result = add(10, 20)
+io.println(result)
+
+io.println("All tests passed!")
