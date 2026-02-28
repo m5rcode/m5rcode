@@ -1,0 +1,73 @@
+# My Discord Bot - Single file with embedded token
+import std.io
+
+# ============================================================================
+# BOT CONFIGURATION
+# ============================================================================
+
+let BOT_TOKEN = "YOUR_DISCORD_BOT_TOKEN_HERE"
+let BOT_PREFIX = "!"
+
+# ============================================================================
+# COMMANDS
+# ============================================================================
+
+fn cmd_ping() {
+    io.println("🏓 Pong!")
+}
+
+fn cmd_hello() {
+    io.println("👋 Hello from m5rcode! I'm a bot written entirely in m5rcode!")
+}
+
+fn cmd_info() {
+    io.println("📊 **m5rBot v1.0**")
+    io.println("• Language: m5rcode v0.3.1")
+    io.println("• Framework: discord.m5")
+    io.println("• Commands: ping, hello, info, calc, help")
+}
+
+fn cmd_calc() {
+    io.println("🔢 **Calculator Demo**")
+    io.println("2 + 2 = " + toStr(2 + 2))
+    io.println("10 * 5 = " + toStr(10 * 5))
+    io.println("sqrt(16) = " + toStr(math.sqrt(16)))
+    io.println("pow(2, 8) = " + toStr(math.pow(2, 8)))
+}
+
+fn cmd_help() {
+    io.println("📖 **Available Commands**")
+    io.println("• `!ping` - Test bot responsiveness")
+    io.println("• `!hello` - Get a greeting")
+    io.println("• `!info` - Bot information")
+    io.println("• `!calc` - Calculator demo")
+    io.println("• `!help` - This help message")
+}
+
+# ============================================================================
+# AUTO-START DISCORD BOT
+# ============================================================================
+
+io.println("🤖 Starting Discord Bot...")
+io.println("Token: " + str.trim(BOT_TOKEN))
+io.println("Prefix: " + BOT_PREFIX)
+io.println("")
+
+# Generate config for Discord bridge
+io.println("[DISCORD_CONFIG]")
+io.println("TOKEN=" + BOT_TOKEN)
+io.println("COMMANDS=ping,hello,info,calc,help")
+io.println("[/DISCORD_CONFIG]")
+
+# For testing locally, run a command
+io.println("")
+io.println("📝 Testing commands locally:")
+io.println("")
+io.println("!ping")
+cmd_ping()
+io.println("")
+io.println("!hello")
+cmd_hello()
+io.println("")
+io.println("✅ Bot ready! To connect to Discord, use:")
+io.println("   m5discord bot.m5")

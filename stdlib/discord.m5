@@ -1,0 +1,53 @@
+# discord.m5 - Discord bot library (discord.py style)
+import std.io
+
+# Bot class
+class Bot {
+    fn new(token, prefix) {
+        return {
+            token: token,
+            prefix: prefix,
+            commands: {},
+            events: {}
+        }
+    }
+    
+    fn command(self, name, handler) {
+        self.commands[name] = handler
+        io.println("[REGISTER] Command: " + name)
+    }
+    
+    fn event(self, name, handler) {
+        self.events[name] = handler
+        io.println("[REGISTER] Event: " + name)
+    }
+    
+    fn run(self) {
+        io.println("[BOT] Starting bot...")
+        io.println("[BOT] Token: " + self.token)
+        io.println("[BOT] Prefix: " + self.prefix)
+        io.println("[BOT] Commands: " + toStr(list.len(self.commands)))
+        
+        # Write config for Rust bridge
+        # TODO: Generate bot_config.json from registered commands
+    }
+}
+
+# Message class
+class Message {
+    fn reply(self, content) {
+        io.println(content)
+    }
+}
+
+# Context class
+class Context {
+    fn send(self, content) {
+        io.println(content)
+    }
+}
+
+# Create bot instance
+fn create_bot(token, prefix) {
+    return Bot.new(token, prefix)
+}

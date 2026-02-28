@@ -1,0 +1,36 @@
+# My Discord Bot - Written in m5rcode!
+import discord
+
+# Create bot with token and prefix
+let bot = discord.create_bot("YOUR_TOKEN_HERE", "!")
+
+# Define ping command
+fn cmd_ping(ctx) {
+    ctx.send("🏓 Pong!")
+}
+
+# Define hello command
+fn cmd_hello(ctx) {
+    ctx.send("👋 Hello from m5rcode!")
+}
+
+# Define info command
+fn cmd_info(ctx) {
+    ctx.send("📊 m5rBot v1.0 - Powered by m5rcode!")
+}
+
+# Define calc command
+fn cmd_calc(ctx) {
+    let result = 2 + 2
+    ctx.send("🔢 2 + 2 = " + toStr(result))
+}
+
+# Register commands
+bot.command("ping", cmd_ping)
+bot.command("hello", cmd_hello)
+bot.command("info", cmd_info)
+bot.command("calc", cmd_calc)
+
+# Start the bot
+io.println("🤖 Starting Discord bot...")
+bot.run()

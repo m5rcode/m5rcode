@@ -109,39 +109,49 @@ async fn main() {
     let args: Vec<String> = env::args().collect();
     
     if args.len() < 2 {
-        eprintln!("m5rcode Discord Bridge v0.1.0");
+        eprintln!("m5rcode Discord Bridge v0.2.0");
         eprintln!("\nUsage:");
-        eprintln!("  m5rcode-discord <token> <config.json>");
-        eprintln!("\nConfig format:");
-        eprintln!("  {{");
-        eprintln!("    \"commands\": {{");
-        eprintln!("      \"ping\": \"handlers/ping.m5\",");
-        eprintln!("      \"help\": \"handlers/help.m5\"");
-        eprintln!("    }}");
-        eprintln!("  }}");
+        eprintln!("  m5rcode-discord <token> <bot.m5>           # Single-file bot");
+        eprintln!("  m5rcode-discord <token> <config.json>      # Multi-file bot");
         std::process::exit(1);
     }
     
     let token = &args[1];
-    let config_path = if args.len() > 2 { &args[2] } else { "bot_config.json" };
+    let bot_file = if args.len() > 2 { &args[2] } else { "bot.m5" };
     
-    // Load configuration
-    let config_content = fs::read_to_string(config_path)
-        .unwrap_or_else(|_| r#"{"commands":{}}"#.to_string());
+    // Check if it's a JSON config or m5 file
+    let is_single_file = bot_file.ends_with(".m5");
     
-    let config: serde_json::Value = serde_json::from_str(&config_content)
-        .expect("Invalid config JSON");
-    
-    // Parse command handlers
-    let mut command_handlers = std::collections::HashMap::new();
-    if let Some(commands) = config["commands"].as_object() {
-        for (cmd, handler) in commands {
-            if let Some(handler_path) = handler.as_str() {
-                command_handlers.insert(cmd.clone(), handler_path.to_string());
-                println!("📝 Registered command: !{} -> {}", cmd, handler_path);
+    let command_handlers = if is_single_file {
+        // Single-file mode: all commands in one file
+        println!("📝 Single-file bot mode: {}", bot_file);
+        let mut handlers = std::collections::HashMap::new();
+        
+        // Register common commands to use the same file
+        for cmd in &["ping", "hello", "info", "calc", "help", "math"] {
+            handlers.insert(cmd.to_string(), bot_file.to_string());
+            println!("📝 Registered command: !{} -> {}", cmd, bot_file);
+        }
+        handlers
+    } else {
+        // Multi-file mode: load from config
+        let config_content = fs::read_to_string(bot_file)
+            .unwrap_or_else(|_| r#"{"commands":{}}"#.to_string());
+        
+        let config: serde_json::Value = serde_json::from_str(&config_content)
+            .expect("Invalid config JSON");
+        
+        let mut handlers = std::collections::HashMap::new();
+        if let Some(commands) = config["commands"].as_object() {
+            for (cmd, handler) in commands {
+                if let Some(handler_path) = handler.as_str() {
+                    handlers.insert(cmd.clone(), handler_path.to_string());
+                    println!("📝 Registered command: !{} -> {}", cmd, handler_path);
+                }
             }
         }
-    }
+        handlers
+    };
     
     let state = Arc::new(BotState {
         command_handlers: Arc::new(RwLock::new(command_handlers)),

@@ -1,0 +1,62 @@
+#!/bin/bash
+# m5rcode Discord Bot Runner
+# Converts discord.m5 style bots to the bridge format
+
+if [ $# -lt 2 ]; then
+    echo "Usage: m5discord <token> <bot.m5>"
+    exit 1
+fi
+
+TOKEN="$1"
+BOT_FILE="$2"
+BOT_DIR=$(dirname "$BOT_FILE")
+BOT_NAME=$(basename "$BOT_FILE" .m5)
+
+# Create temporary directory
+TEMP_DIR="/tmp/m5discord_$$"
+mkdir -p "$TEMP_DIR/handlers"
+
+echo "🔧 Preparing bot: $BOT_FILE"
+
+# Parse bot file and extract commands
+# For now, create a simple config
+cat > "$TEMP_DIR/bot_config.json" << EOF
+{
+  "bot": {
+    "name": "$BOT_NAME",
+    "version": "1.0.0",
+    "prefix": "!"
+  },
+  "commands": {
+    "ping": "handlers/ping.m5",
+    "hello": "handlers/hello.m5",
+    "info": "handlers/info.m5",
+    "calc": "handlers/calc.m5"
+  }
+}
+EOF
+
+# Create handler wrappers that call the bot file
+for cmd in ping hello info calc; do
+    cat > "$TEMP_DIR/handlers/$cmd.m5" << EOF
+# Auto-generated handler for: $cmd
+import std.io
+
+# Simulate context
+let ctx = { send: fn(msg) { io.println(msg) } }
+
+# Load and execute command from bot file
+# TODO: Parse and extract specific command function
+io.println("Command: $cmd")
+EOF
+done
+
+echo "✅ Bot prepared"
+echo "🚀 Starting Discord bot..."
+
+# Run the bridge
+cd "$(dirname "$0")/../runtime/discord"
+./target/release/m5rcode-discord "$TOKEN" "$TEMP_DIR/bot_config.json"
+
+# Cleanup
+rm -rf "$TEMP_DIR"

@@ -1,0 +1,274 @@
+# ModBot - Advanced Discord Moderation Bot
+# Written in m5rcode v0.3.1
+import std.io
+
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
+
+let BOT_TOKEN = "YOUR_DISCORD_BOT_TOKEN_HERE"
+let BOT_PREFIX = "!"
+let BOT_NAME = "ModBot"
+let BOT_VERSION = "1.0.0"
+
+# Moderation settings
+let MAX_WARNINGS = 3
+let AUTO_MOD_ENABLED = true
+let LOG_CHANNEL = "mod-logs"
+
+# ============================================================================
+# MODERATION COMMANDS
+# ============================================================================
+
+fn cmd_kick() {
+    io.println("🚫 **Kick Command**")
+    io.println("Usage: !kick @user [reason]")
+    io.println("Kicks a user from the server")
+    io.println("⚠️ Requires: Kick Members permission")
+}
+
+fn cmd_ban() {
+    io.println("🔨 **Ban Command**")
+    io.println("Usage: !ban @user [reason]")
+    io.println("Permanently bans a user from the server")
+    io.println("⚠️ Requires: Ban Members permission")
+}
+
+fn cmd_unban() {
+    io.println("✅ **Unban Command**")
+    io.println("Usage: !unban <user_id> [reason]")
+    io.println("Removes a ban from a user")
+    io.println("⚠️ Requires: Ban Members permission")
+}
+
+fn cmd_mute() {
+    io.println("🔇 **Mute Command**")
+    io.println("Usage: !mute @user [duration] [reason]")
+    io.println("Mutes a user (removes send message permission)")
+    io.println("Duration: 5m, 1h, 1d, permanent")
+    io.println("⚠️ Requires: Manage Roles permission")
+}
+
+fn cmd_unmute() {
+    io.println("🔊 **Unmute Command**")
+    io.println("Usage: !unmute @user")
+    io.println("Removes mute from a user")
+    io.println("⚠️ Requires: Manage Roles permission")
+}
+
+fn cmd_warn() {
+    io.println("⚠️ **Warning System**")
+    io.println("Usage: !warn @user <reason>")
+    io.println("Issues a warning to a user")
+    io.println("After " + toStr(MAX_WARNINGS) + " warnings, user is auto-kicked")
+    io.println("⚠️ Requires: Kick Members permission")
+}
+
+fn cmd_warnings() {
+    io.println("📋 **User Warnings**")
+    io.println("Usage: !warnings @user")
+    io.println("Shows all warnings for a user")
+    io.println("Example: User has 2/3 warnings")
+}
+
+fn cmd_clearwarns() {
+    io.println("🧹 **Clear Warnings**")
+    io.println("Usage: !clearwarns @user")
+    io.println("Clears all warnings for a user")
+    io.println("⚠️ Requires: Administrator permission")
+}
+
+# ============================================================================
+# UTILITY COMMANDS
+# ============================================================================
+
+fn cmd_purge() {
+    io.println("🗑️ **Purge Messages**")
+    io.println("Usage: !purge <amount>")
+    io.println("Deletes the specified number of messages (1-100)")
+    io.println("⚠️ Requires: Manage Messages permission")
+}
+
+fn cmd_slowmode() {
+    io.println("⏱️ **Slowmode**")
+    io.println("Usage: !slowmode <seconds>")
+    io.println("Sets slowmode delay (0-21600 seconds)")
+    io.println("Use 0 to disable slowmode")
+    io.println("⚠️ Requires: Manage Channels permission")
+}
+
+fn cmd_lock() {
+    io.println("🔒 **Lock Channel**")
+    io.println("Usage: !lock [reason]")
+    io.println("Prevents @everyone from sending messages")
+    io.println("⚠️ Requires: Manage Channels permission")
+}
+
+fn cmd_unlock() {
+    io.println("🔓 **Unlock Channel**")
+    io.println("Usage: !unlock")
+    io.println("Allows @everyone to send messages again")
+    io.println("⚠️ Requires: Manage Channels permission")
+}
+
+# ============================================================================
+# INFORMATION COMMANDS
+# ============================================================================
+
+fn cmd_userinfo() {
+    io.println("👤 **User Information**")
+    io.println("Usage: !userinfo [@user]")
+    io.println("")
+    io.println("**Example Output:**")
+    io.println("Username: User#1234")
+    io.println("ID: 123456789")
+    io.println("Joined: 2024-01-15")
+    io.println("Roles: @Member, @Verified")
+    io.println("Warnings: 0/3")
+}
+
+fn cmd_serverinfo() {
+    io.println("🏠 **Server Information**")
+    io.println("")
+    io.println("**Server Name:** Example Server")
+    io.println("**Owner:** Owner#0001")
+    io.println("**Members:** 1,234")
+    io.println("**Channels:** 25")
+    io.println("**Roles:** 15")
+    io.println("**Created:** 2023-06-10")
+    io.println("**Verification:** Medium")
+}
+
+fn cmd_modlogs() {
+    io.println("📜 **Moderation Logs**")
+    io.println("Usage: !modlogs [@user]")
+    io.println("")
+    io.println("Shows recent moderation actions")
+    io.println("Includes: kicks, bans, mutes, warnings")
+}
+
+# ============================================================================
+# ROLE MANAGEMENT
+# ============================================================================
+
+fn cmd_addrole() {
+    io.println("➕ **Add Role**")
+    io.println("Usage: !addrole @user @role")
+    io.println("Adds a role to a user")
+    io.println("⚠️ Requires: Manage Roles permission")
+}
+
+fn cmd_removerole() {
+    io.println("➖ **Remove Role**")
+    io.println("Usage: !removerole @user @role")
+    io.println("Removes a role from a user")
+    io.println("⚠️ Requires: Manage Roles permission")
+}
+
+# ============================================================================
+# AUTO-MODERATION
+# ============================================================================
+
+fn cmd_automod() {
+    io.println("🤖 **Auto-Moderation Status**")
+    io.println("")
+    if AUTO_MOD_ENABLED {
+        io.println("✅ Auto-mod is **ENABLED**")
+        io.println("")
+        io.println("**Active Filters:**")
+        io.println("• Spam detection")
+        io.println("• Link filtering")
+        io.println("• Bad word filter")
+        io.println("• Caps lock filter")
+        io.println("• Mention spam (5+ mentions)")
+        io.println("• Duplicate messages")
+    }
+}
+
+# ============================================================================
+# HELP & INFO
+# ============================================================================
+
+fn cmd_help() {
+    io.println("📖 **ModBot Help**")
+    io.println("")
+    io.println("**Moderation:**")
+    io.println("`!kick` - Kick a user")
+    io.println("`!ban` - Ban a user")
+    io.println("`!unban` - Unban a user")
+    io.println("`!mute` - Mute a user")
+    io.println("`!unmute` - Unmute a user")
+    io.println("`!warn` - Warn a user")
+    io.println("`!warnings` - View warnings")
+    io.println("`!clearwarns` - Clear warnings")
+    io.println("")
+    io.println("**Utility:**")
+    io.println("`!purge` - Delete messages")
+    io.println("`!slowmode` - Set slowmode")
+    io.println("`!lock` - Lock channel")
+    io.println("`!unlock` - Unlock channel")
+    io.println("")
+    io.println("**Info:**")
+    io.println("`!userinfo` - User information")
+    io.println("`!serverinfo` - Server information")
+    io.println("`!modlogs` - Moderation logs")
+    io.println("")
+    io.println("**Roles:**")
+    io.println("`!addrole` - Add role to user")
+    io.println("`!removerole` - Remove role from user")
+    io.println("")
+    io.println("**Other:**")
+    io.println("`!automod` - Auto-mod status")
+    io.println("`!ping` - Test bot")
+    io.println("`!info` - Bot information")
+}
+
+fn cmd_info() {
+    io.println("🤖 **ModBot Information**")
+    io.println("")
+    io.println("**Name:** " + BOT_NAME)
+    io.println("**Version:** " + BOT_VERSION)
+    io.println("**Language:** m5rcode v0.3.1")
+    io.println("**Framework:** discord.m5")
+    io.println("")
+    io.println("**Features:**")
+    io.println("✅ User moderation (kick, ban, mute)")
+    io.println("✅ Warning system")
+    io.println("✅ Message management")
+    io.println("✅ Role management")
+    io.println("✅ Auto-moderation")
+    io.println("✅ Detailed logging")
+    io.println("")
+    io.println("**Commands:** 20+")
+    io.println("**Uptime:** 99.9%")
+    io.println("")
+    io.println("Type `!help` for command list")
+}
+
+fn cmd_ping() {
+    io.println("🏓 Pong! Bot is online and responsive.")
+}
+
+# ============================================================================
+# COMMAND ROUTER
+# ============================================================================
+
+# This bot is called by the Discord bridge for each command
+# The bridge will execute this file and capture the output
+
+# For local testing, change this to test different commands:
+let test_command = "help"
+
+# In production, the Discord bridge calls the appropriate command
+# based on what the user typed
+
+# Execute the test command (for local testing)
+if test_command == "help" {
+    cmd_help()
+}
+if test_command == "info" {
+    cmd_info()
+}
+if test_command == "ping" {
+    cmd_ping()
+}
